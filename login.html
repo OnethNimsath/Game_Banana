@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Game Login</title>
+    <link rel="stylesheet" href="login.css">
+
+    <style>
+        
+        @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
+
+        body{
+            background-image: url(banana_img01.jpg);
+            height: 50vh;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <audio src="">
+        <source src="#">
+    </audio>
+
+    <script>
+        window.addEventListener('click', () => {
+            document.getElementById("song").play();
+        });
+    </script>
+
+    <div class="container">
+    <div class="login-area">
+        <h2>Player Login</h2>
+        <form action="#">
+            <div class="input-field">
+                <input type="email" required>
+                <label>Email</label>
+            </div>
+
+            <div class="input-field">
+                <input type="password" required>
+                <label>Password</label>
+            </div>
+
+            <div class="forgot_password">
+                <a href="reset_pass.html">Reset Your Password?</a>
+            </div>
+            
+            <button type="submit" class="login_btn">Login</button>
+
+            <div class="signup_link">
+                <a href="signup.html">Create a new User Account?</a>
+            </div>
+        </form>
+    </div> 
+</div>  
+</body>
+</html>

@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: content-box;
+}
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: transparent;
+}
+
+.container{
+    position: relative;
+    width: 256px;
+    height: 256px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-area{
+    position: absolute;
+    width: 400px;
+    background: yellow;
+    /*background: transparent;*/
+    /*opacity: 0.78;*/
+    background-color: rgba(255, 255, 0, 0.65);
+}
+
+.login-area form{
+    width: 100%;
+    padding: 0 40px;
+}
+
+h2{
+    font-size: 2em;
+    color: black;
+    text-align: center;
+}
+
+.input-field{
+    position: relative;
+    margin: 25px 0;
+}
+
+.input-field input{
+    width: 70%;
+    height: 47px;
+    background: transparent;
+    border: 2px solid black;
+    font-size: 1em;
+    color: black;
+    padding: 0 20px;
+    outline: none;
+    border-radius: 40px;
+    transition: 0.5s ease;
+}
+
+.input-field input:focus,
+.input-field input:valid{
+    border-color: red;
+}
+
+
+.input-field input:focus~label,
+.input-field input:valid~label{
+    top: 1px;
+    font-size: .8em;
+    background: yellow;
+    color: red;
+    padding: 0 6px;
+}
+
+.input-field label{
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    font-size: 1em;
+    color: black;
+    pointer-events: none;
+    transition: .5s ease;
+}
+
+.forgot_password{
+    margin: 15px 0 20px;
+    text-align: center;
+}
+
+.forgot_password a{
+    font-size: medium;
+    color: black;
+    text-decoration: wavy;
+}
+
+.forgot_password a:hover{
+    text-decoration: underline;
+}
+
+.login_btn{
+    width: 70%;
+    height: 40px;
+    color: white;
+    background: black;
+    font-size: large;
+    border: none;
+    outline: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 800;
+}
+
+.login_btn:hover{
+    color: yellow;
+}
+
+.signup_link{
+    margin: 20px 0 15px; 
+}
+
+.signup_link a{
+    font-size: medium;
+    color: black;
+    text-decoration: underline;
+}
+
+.signup_link a:hover{
+    color: red;
+}
