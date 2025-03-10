@@ -1,62 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Game Login</title>
-    <link rel="stylesheet" href="login.css">
-
-    <style>
-        
-        @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
-
-        body{
-            background-image: url(banana_img01.jpg);
-            height: 50vh;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="login.css">
+  <title>Banana Game Login</title>
 </head>
-
 <body>
 
-    <audio src="">
-        <source src="#">
-    </audio>
+  <div class="background"></div>
 
-    <script>
-        window.addEventListener('click', () => {
-            document.getElementById("song").play();
-        });
-    </script>
+  <div class="floating-bananas-container">
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+  </div>
+  
+  <div class="falling-bananas">
+    <div class="falling-banana"></div>
+    <div class="falling-banana"></div>
+    <div class="falling-banana"></div>
+    <div class="falling-banana"></div>
+    <div class="falling-banana"></div>
+  </div>
+  
+  <div class="login-container">
+    <div class="banana"></div>
+    <div class="monkey"></div>
+    
+    <div class="login-header">
+      <h1>Banana Quest</h1>
+      <p>Enter your credentials to start playing!</p>
+    </div>
+    
+    <form>
+      <div class="input-group">
+        <label for="username">Player Name</label>
+        <input type="text" id="username" placeholder="Enter your player name" required>
+      </div>
+      
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
+      </div>
+      
+      <button type="submit" class="login-btn">Start Adventure!</button>
 
-    <div class="container">
-    <div class="login-area">
-        <h2>Player Login</h2>
-        <form action="#">
-            <div class="input-field">
-                <input type="email" required>
-                <label>Email</label>
-            </div>
-
-            <div class="input-field">
-                <input type="password" required>
-                <label>Password</label>
-            </div>
-
-            <div class="forgot_password">
-                <a href="reset_pass.html">Reset Your Password?</a>
-            </div>
-            
-            <button type="submit" class="login_btn">Login</button>
-
-            <div class="signup_link">
-                <a href="signup.html">Create a new User Account?</a>
-            </div>
-        </form>
-    </div> 
-</div>  
+      <div class="login-link">
+        <p>Need to create an account? <a href="signup.html">Sign Up</a></p>
+      </div>
+      
+    </form>
+  </div>
+  
+  <script>
+    
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      if (username && password) {
+        alert('Welcome to Banana Quest, ' + username + '!');
+      }
+    });
+  </script>
 </body>
 </html>
