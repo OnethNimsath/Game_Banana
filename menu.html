@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Banana Quest - Game Menu</title>
+  <link rel="stylesheet" href="menu.css">
+</head>
+<body>
+
+  <div class="background"></div>
+  
+  <script>
+    // Create floating monkey animations
+    function createMonkeys() {
+      for (let i = 0; i < 10; i++) {
+        const monkey = document.createElement('div');
+        monkey.className = 'monkey';
+        monkey.style.left = Math.random() * 100 + 'vw';
+        monkey.style.top = Math.random() * 100 + 'vh';
+        monkey.style.animationDelay = Math.random() * 5 + 's';
+        document.body.appendChild(monkey);
+      }
+    }
+    
+    // Call the function when the page loads
+    window.onload = createMonkeys;
+  </script>
+  
+  <div class="menu-container">
+    <h1>Banana Quest</h1>
+    
+    <button class="button play-btn">
+      <span class="banana-icon">🍌</span> Play Game
+    </button>
+    
+    <button class="button leaderboard-btn">
+      <span class="banana-icon">🍌</span> Leaderboard
+    </button>
+    
+    <button class="button settings-btn">
+      <span class="banana-icon">🍌</span> Settings
+    </button>
+    
+    <button class="button exit-btn">
+      <span class="banana-icon">🍌</span> Exit Game
+    </button>
+  </div>
+</body>
+</html>
