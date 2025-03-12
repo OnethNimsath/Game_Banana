@@ -223,6 +223,38 @@
         transform: scaleX(1);
         transform-origin: left;
       }
+
+      .forgot-password-container {
+        text-align: center;
+        margin-top: 15px;
+      }
+      
+      .forgot-password-link {
+        color: #996515;
+        text-decoration: none;
+        position: relative;
+        font-size: 14px;
+        transition: color 0.3s ease;
+      }
+      
+      .forgot-password-link:hover {
+        color: #D4AF37;
+      }
+      
+      .forgot-password-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: #D4AF37;
+        transition: width 0.3s ease;
+      }
+      
+      .forgot-password-link:hover::after {
+        width: 100%;
+      }
     
     .input-group {
       margin-bottom: 20px;
