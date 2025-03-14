@@ -63,9 +63,15 @@
       <span class="banana-icon">🍌</span> Settings
     </button>
     
-    <button class="button exit-btn">
+    <button class="button exit-btn" id="exitGame">
       <span class="banana-icon">🍌</span> Exit Game
-    </button>
+  </button>
+  
+  <script>
+      document.getElementById("exitGame").addEventListener("click", function() {
+          window.location.href = "login.html";
+      });
+  </script>
   </div>
 </body>
 </html>
