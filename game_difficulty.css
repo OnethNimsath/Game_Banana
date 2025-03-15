@@ -1,60 +1,145 @@
 body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #FFF2BF;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background: #f7e987;
     height: 100vh;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><path d="M10,10 Q15,5 20,10 T30,10" stroke="%23FFDB70" fill="none" stroke-width="2"/></svg>');
-}
-
-.container {
-    position: relative;
-    width: 100%;
-    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-}
-
-.banana-bg {
+    position: relative;
+  }
+  
+  .background {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800"><path d="M400,150 C550,150 650,300 650,450 C650,600 550,650 400,650 C250,650 150,600 150,450 C150,300 250,150 400,150 Z" stroke="%23E6C649" fill="%23E6C649" stroke-width="2" opacity="0.3"/></svg>');
-    background-repeat: no-repeat;
-    background-position: center;
+    background: url(monkey-image.jpg) center/cover;
     z-index: -1;
-}
-
-.monkey {
+    opacity: 0.2;
+  }
+  
+  /* Floating background bananas */
+  .floating-bananas-container {
     position: absolute;
-    width: 30px;
-    height: 30px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="10" fill="%23E6C649" /><circle cx="12" cy="12" r="2" fill="%23000" /><circle cx="18" cy="12" r="2" fill="%23000" /><path d="M12,18 Q15,20 18,18" stroke="%23000" fill="none" stroke-width="1" /></svg>');
-    animation: float 10s infinite linear;
-}
-
-@keyframes float {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1;
+  }
+  
+  .floating-banana {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: url(Banana-01.png) no-repeat;
+    background-size: contain;
+    opacity: 0.3;
+    animation: float-around linear infinite;
+  }
+  
+  @keyframes float-around {
     0% {
-        transform: translate(0, 0) rotate(0deg);
+      transform: translate(0, 0) rotate(0deg) scale(1);
     }
     25% {
-        transform: translate(100px, 50px) rotate(90deg);
+      transform: translate(10px, 10px) rotate(90deg) scale(1.1);
     }
     50% {
-        transform: translate(200px, 0) rotate(180deg);
+      transform: translate(0, 20px) rotate(180deg) scale(1);
     }
     75% {
-        transform: translate(100px, -50px) rotate(270deg);
+      transform: translate(-10px, 10px) rotate(270deg) scale(0.9);
     }
     100% {
-        transform: translate(0, 0) rotate(360deg);
+      transform: translate(0, 0) rotate(360deg) scale(1);
     }
-}
+  }
+  
+  /* Generate multiple floating bananas with different positions, sizes, and animation speeds */
+  .floating-banana:nth-child(1) {
+    top: 10%;
+    left: 10%;
+    animation-duration: 15s;
+  }
+  
+  .floating-banana:nth-child(2) {
+    top: 20%;
+    left: 70%;
+    animation-duration: 18s;
+    width: 70px;
+    height: 70px;
+  }
+  
+  .floating-banana:nth-child(3) {
+    top: 50%;
+    left: 30%;
+    animation-duration: 20s;
+    animation-delay: 2s;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .floating-banana:nth-child(4) {
+    top: 70%;
+    left: 65%;
+    animation-duration: 17s;
+    animation-delay: 1s;
+    width: 80px;
+    height: 80px;
+  }
+  
+  .floating-banana:nth-child(5) {
+    top: 40%;
+    left: 85%;
+    animation-duration: 22s;
+    width: 55px;
+    height: 55px;
+  }
+  
+  .floating-banana:nth-child(6) {
+    top: 80%;
+    left: 15%;
+    animation-duration: 19s;
+    animation-delay: 3s;
+    width: 65px;
+    height: 65px;
+  }
+  
+  .floating-banana:nth-child(7) {
+    top: 15%;
+    left: 40%;
+    animation-duration: 21s;
+    animation-delay: 2s;
+    width: 75px;
+    height: 75px;
+  }
+  
+  .floating-banana:nth-child(8) {
+    top: 60%;
+    left: 5%;
+    animation-duration: 16s;
+    animation-delay: 1.5s;
+    width: 45px;
+    height: 45px;
+  }
+  
+  .floating-banana:nth-child(9) {
+    top: 30%;
+    left: 60%;
+    animation-duration: 23s;
+    width: 60px;
+    height: 60px;
+  }
+  
+  .floating-banana:nth-child(10) {
+    top: 85%;
+    left: 80%;
+    animation-duration: 19s;
+    animation-delay: 2.5s;
+    width: 70px;
+    height: 70px;
+  }
 
 .difficulty-panel {
     background-color: white;

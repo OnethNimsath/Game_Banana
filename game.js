@@ -169,6 +169,10 @@ function startup() {
     document.getElementById('newGameButtonContainer').innerHTML = '<button class="button-62" onclick="newgame()">New Game?</button>';
 }
 
+function goBack() {
+    window.history.back();
+  }
+
 // Randomize floating bananas
 const floatingBananas = document.querySelectorAll('.floating-banana');
 floatingBananas.forEach(banana => {
