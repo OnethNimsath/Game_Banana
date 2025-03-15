@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="game_difficulty.css">
+    <title>Banana Quest - Select Difficulty</title>
+</head>
+<body>
+    <div class="container">
+        <div class="banana-bg"></div>
+        
+        <!-- Floating monkeys -->
+        <div class="monkey" style="top: 10%; left: 10%; animation-delay: -2s;"></div>
+        <div class="monkey" style="top: 20%; left: 80%; animation-delay: -5s;"></div>
+        <div class="monkey" style="top: 70%; left: 15%; animation-delay: -8s;"></div>
+        <div class="monkey" style="top: 75%; left: 70%; animation-delay: -1s;"></div>
+        <div class="monkey" style="top: 40%; left: 90%; animation-delay: -3s;"></div>
+        
+        <div class="difficulty-panel">
+            <h1>Banana Quest</h1>
+            <p class="subtitle">Select Difficulty Level</p>
+            
+            <button class="difficulty-btn easy" onclick="startGame('easy')">Easy</button>
+            <button class="difficulty-btn medium" onclick="startGame('medium')">Medium</button>
+            <button class="difficulty-btn hard" onclick="startGame('hard')">Hard</button>
+            
+            <button class="difficulty-btn back-btn" onclick="goBack()">Back to Menu</button>
+        </div>
+    </div>
+    
+    <script>
+        function startGame(difficulty) {
+            // Store the selected difficulty in localStorage
+            localStorage.setItem('gameDifficulty', difficulty);
+            // Redirect to the game page
+            window.location.href = 'game.html';
+        }
+        
+        function goBack() {
+            // Go back to the main menu
+            window.location.href = 'menu.html';
+        }
+    </script>
+</body>
+</html>
