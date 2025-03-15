@@ -51,7 +51,7 @@
   <div class="menu-container">
     <h1>Banana Quest</h1>
     
-    <button class="button play-btn">
+    <button class="button play-btn" id="playGame">
       <span class="banana-icon">🍌</span> Play Game
     </button>
     
@@ -70,6 +70,10 @@
   <script>
       document.getElementById("exitGame").addEventListener("click", function() {
           window.location.href = "login.html";
+      });
+
+      document.getElementById("playGame").addEventListener("click", function() {
+          window.location.href = "game.html";
       });
   </script>
   </div>
