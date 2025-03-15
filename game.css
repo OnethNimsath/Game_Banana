@@ -1,0 +1,235 @@
+body {
+    font-family: 'Arial', sans-serif;
+    color: #141200;
+    background: #f7e987;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    text-align: center;
+    overflow: hidden; /* Prevent scrollbars */
+}
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('Game_Banana/monkey-image.jpg'); /* Replace with your image URL */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    opacity: 0.2;
+    z-index: -2; /* Place behind content */
+}
+
+.floating-bananas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allow interaction with elements below */
+    z-index: -1; /* Place behind content, but above background */
+}
+
+.floating-banana {
+    position: absolute;
+    width: 50px; /* Adjust size as needed */
+    height: 50px; /* Adjust size as needed */
+    background-image: url('Game_Banana/Banana-01.png'); /* Replace with your banana image URL */
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: float 5s linear infinite; /* Adjust animation duration as needed */
+}
+
+.floating-banana:nth-child(1) {
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+floating-banana:nth-child(2) {
+    top: 20%;
+    left: 30%;
+    animation-delay: 1s;
+}
+
+floating-banana:nth-child(3) {
+    top: 30%;
+    left: 50%;
+    animation-delay: 2s;
+}
+
+floating-banana:nth-child(4) {
+    top: 40%;
+    left: 70%;
+    animation-delay: 3s;
+}
+
+floating-banana:nth-child(5) {
+    top: 50%;
+    left: 90%;
+    animation-delay: 4s;
+}
+
+floating-banana:nth-child(6) {
+    top: 60%;
+    left: 5%;
+    animation-delay: 1.5s;
+}
+
+floating-banana:nth-child(7) {
+    top: 70%;
+    left: 25%;
+    animation-delay: 2.5s;
+}
+
+floating-banana:nth-child(8) {
+    top: 80%;
+    left: 45%;
+    animation-delay: 3.5s;
+}
+
+floating-banana:nth-child(9) {
+    top: 90%;
+    left: 65%;
+    animation-delay: 0.5s;
+}
+
+floating-banana:nth-child(10) {
+    top: 5%;
+    left: 85%;
+    animation-delay: 2s;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(20px); /* Adjust float height as needed */
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.falling-bananas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.falling-banana {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-image: url('banana.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: fall 7s linear infinite;
+}
+
+.falling-banana:nth-child(1) {
+    left: 5%;
+    animation-delay: 0s;
+}
+
+falling-banana:nth-child(2) {
+    left: 25%;
+    animation-delay: 2s;
+}
+
+falling-banana:nth-child(3) {
+    left: 45%;
+    animation-delay: 4s;
+}
+
+falling-banana:nth-child(4) {
+    left: 65%;
+    animation-delay: 6s;
+}
+
+falling-banana:nth-child(5) {
+    left: 85%;
+    animation-delay: 1s;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-50px);
+    }
+    100% {
+        transform: translateY(100vh);
+    }
+}
+
+/* Rest of your CSS (button styles, input styles, etc.) */
+h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.button-62 {
+    background: linear-gradient(to bottom right, #EF4765, #FF9A5A);
+    border: 0;
+    border-radius: 12px;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-family: -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 1rem 2rem;
+    text-align: center;
+    text-decoration: none;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    white-space: nowrap;
+}
+
+.button-62:hover {
+    box-shadow: 0 0 15px rgba(255, 154, 90, 0.7);
+    transform: scale(1.05);
+}
+
+.button-62:focus {
+    outline: none;
+    box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(239, 71, 101, 0.5), .125rem .125rem 1rem rgba(255, 154, 90, 0.5);
+}
+
+#input {
+    padding: 1rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    margin: 20px 0;
+    outline: none;
+    width: 50%;
+    max-width: 300px;
+}
+
+#quest {
+    width: 100%;
+    max-width: 350px;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+#note {
+    font-size: 1.5rem;
+    margin-top: 20px;
+}
+
+#lives {
+    font-size: 1.2rem;
+    margin-top: 10px;
+}
