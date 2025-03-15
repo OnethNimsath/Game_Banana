@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="GENERATOR" content="A plain text editor">
+    <meta name="Author" content="Marc Conrad">
+    <link rel="stylesheet" href="game.css">
+    <meta name="Description" content="Banana Game Demo">
+
+    <title>The Banana Puzzle</title>
+
+</head>
+
+<body>
+
+    <div class="background"></div>
+
+    <div class="floating-bananas-container">
+        <div class="floating-banana"></div>
+        <div class="floating-banana"></div>
+        <div class="floating-banana"></div>
+        <div class="floating-banana"></div>
+        <div class="floating-banana"></div>
+        <div class="floating-banana"></div>
+        <div class="floating-banana"></div>
+        <div class="floating-banana"></div>
+        <div class="floating-banana"></div>
+        <div class="floating-banana"></div>
+      </div>
+      
+      <div class="falling-bananas">
+        <div class="falling-banana"></div>
+        <div class="falling-banana"></div>
+        <div class="falling-banana"></div>
+        <div class="falling-banana"></div>
+        <div class="falling-banana"></div>
+      </div>
+
+    <div>
+        <h1>The Banana Puzzle</h1>
+        <img id="quest" src="https://www.sanfoh.com/uob/banana/data/t70c9af9b2750792cc9835e656cn64.png">
+        <div id="lives">Lives: 3</div>
+        <div>
+            <h2 id="note">Enter the missing digit below:</h2>
+            <input id="input" type="number" step="1" min="0" max="9" autofocus placeholder="Enter a digit">
+            <button class="button-62" onclick="handleInput()">Submit</button>
+        </div>
+        <div id="newGameButtonContainer">
+          <button class="button-62" onclick="newgame()">New Game?</button>
+        </div>
+        <p>
+            <hr>
+        </p>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
