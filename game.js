@@ -2,6 +2,13 @@ var quest = "";
 var solution = -1;
 var lives = 3;
 var difficulty = "medium"; // Default difficulty
+var timer = null;
+var timeLeft = 20; // Default time (will be set based on difficulty)
+
+// Function to navigate back to menu.html when the back button is clicked
+function goBack() {
+    window.location.href = 'game_difficulty.html';
+}
 
 // Initialize game based on selected difficulty
 function initializeGame() {
@@ -12,26 +19,51 @@ function initializeGame() {
     switch(difficulty) {
         case "easy":
             lives = 5;
+            timeLeft = 30;
             break;
         case "medium":
             lives = 3;
+            timeLeft = 20;
             break;
         case "hard":
             lives = 1;
+            timeLeft = 15;
             break;
         default:
             lives = 3;
+            timeLeft = 20;
     }
     
     // Add difficulty indicator to UI
     addDifficultyIndicator();
     
+    // Create or update timer element
+    if (!document.getElementById('timer')) {
+        let timerElement = document.createElement("div");
+        timerElement.id = "timer";
+        timerElement.innerHTML = "Time: " + timeLeft;
+        timerElement.className = "timer-display"; // Add a class for styling
+        
+        // Add to the header area
+        document.querySelector('.back-button').after(timerElement);
+    } else {
+        document.getElementById('timer').innerHTML = "Time: " + timeLeft;
+    }
+    
     updateLivesDisplay();
+    updateTimerDisplay();
     startup();
+    startTimer();
 }
 
 // Add a visual indicator for the current difficulty
 function addDifficultyIndicator() {
+    // Remove existing indicator if present
+    let existingIndicator = document.getElementById("difficulty-indicator");
+    if (existingIndicator) {
+        existingIndicator.remove();
+    }
+    
     let difficultyLabel = document.createElement("div");
     difficultyLabel.id = "difficulty-indicator";
     difficultyLabel.className = "difficulty-" + difficulty;
@@ -57,84 +89,161 @@ function addDifficultyIndicator() {
     livesElement.parentNode.insertBefore(difficultyLabel, livesElement.nextSibling);
 }
 
+function startTimer() {
+    // Clear any existing timer
+    if (timer) {
+        clearInterval(timer);
+    }
+    
+    // Start a new timer
+    timer = setInterval(function() {
+        timeLeft--;
+        updateTimerDisplay();
+        
+        if (timeLeft <= 0) {
+            // Time's up!
+            clearInterval(timer);
+            handleTimeOut();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    let timerElement = document.getElementById('timer');
+    timerElement.innerHTML = "Time: " + timeLeft;
+    
+    // Change color based on time remaining
+    if (timeLeft <= 5) {
+        timerElement.style.color = "#E9573F"; // Red for danger
+        timerElement.classList.add('critical');
+    } else if (timeLeft <= 10) {
+        timerElement.style.color = "#8B8000"; // Yellow for warning
+        timerElement.classList.remove('critical');
+    } else {
+        timerElement.style.color = "#8CC152"; // Green for good
+        timerElement.classList.remove('critical');
+    }
+}
+
+// Function to play the timer alert sound
+function playTimerAlertSound() {
+    const sound = document.getElementById('timerAlertSound');
+    if (sound) {
+        sound.currentTime = 0; // Reset the audio to the beginning
+        sound.play().catch(error => {
+            console.log("Audio play failed:", error);
+            // This can happen if user hasn't interacted with the page yet
+        });
+    }
+}
+
+function handleTimeOut() {
+    lives--;
+    updateLivesDisplay();
+    
+    if (lives === 0) {
+        document.getElementById("note").innerHTML = "Game Over!";
+        document.getElementById('newGameButtonContainer').innerHTML = '<button class="button-62" onclick="newgame()">New Game?</button>';
+        
+        // Reset lives and time based on difficulty for next game
+        resetLivesAndTime();
+    } else {
+        document.getElementById("note").innerHTML = "Time's Up!";
+        // Reset time and provide a new puzzle
+        resetTime();
+        fetchText();
+        startTimer();
+    }
+}
+
+function resetTime() {
+    // Reset time based on difficulty
+    switch(difficulty) {
+        case "easy":
+            timeLeft = 30;
+            break;
+        case "medium":
+            timeLeft = 20;
+            break;
+        case "hard":
+            timeLeft = 15;
+            break;
+        default:
+            timeLeft = 20;
+    }
+    updateTimerDisplay();
+}
+
+function resetLivesAndTime() {
+    // Reset lives and time based on difficulty
+    switch(difficulty) {
+        case "easy":
+            lives = 5;
+            timeLeft = 30;
+            break;
+        case "medium":
+            lives = 3;
+            timeLeft = 20;
+            break;
+        case "hard":
+            lives = 1;
+            timeLeft = 15;
+            break;
+        default:
+            lives = 3;
+            timeLeft = 20;
+    }
+    updateLivesDisplay();
+    updateTimerDisplay();
+}
+
 function newgame() {
     // Get difficulty from localStorage again in case it changed
     difficulty = localStorage.getItem('gameDifficulty') || "medium";
     
-    // Set lives based on difficulty
-    switch(difficulty) {
-        case "easy":
-            lives = 5;
-            break;
-        case "medium":
-            lives = 3;
-            break;
-        case "hard":
-            lives = 1;
-            break;
-        default:
-            lives = 3;
+    // Reset lives and time
+    resetLivesAndTime();
+    
+    // Update the difficulty indicator
+    addDifficultyIndicator();
+    
+    // Reset timer
+    if (timer) {
+        clearInterval(timer);
     }
     
-    // Update the difficulty indicator if it exists, otherwise add it
-    let difficultyIndicator = document.getElementById("difficulty-indicator");
-    if (difficultyIndicator) {
-        difficultyIndicator.className = "difficulty-" + difficulty;
-        
-        switch(difficulty) {
-            case "easy":
-                difficultyIndicator.innerHTML = "Easy Mode";
-                difficultyIndicator.style.color = "#8CC152";
-                break;
-            case "medium":
-                difficultyIndicator.innerHTML = "Medium Mode";
-                difficultyIndicator.style.color = "#F6BB42";
-                break;
-            case "hard":
-                difficultyIndicator.innerHTML = "Hard Mode";
-                difficultyIndicator.style.color = "#E9573F";
-                break;
-        }
-    } else {
-        addDifficultyIndicator();
-    }
-    
-    updateLivesDisplay();
     startup();
+    startTimer();
 }
 
 function handleInput() {
     let inp = document.getElementById("input");
     let note = document.getElementById("note");
     if (parseInt(inp.value) === solution) {
+        // Stop the timer
+        clearInterval(timer);
+        
         note.innerHTML = 'Correct!';
         document.getElementById('newGameButtonContainer').innerHTML = '<button class="button-62" onclick="newgame()">New Game?</button>';
     } else {
         lives--;
         updateLivesDisplay();
         if (lives === 0) {
+            // Stop the timer
+            clearInterval(timer);
+            
             note.innerHTML = "Game Over!";
             document.getElementById('newGameButtonContainer').innerHTML = '<button class="button-62" onclick="newgame()">New Game?</button>';
             
-            // Reset lives based on difficulty for next game
-            switch(difficulty) {
-                case "easy":
-                    lives = 5;
-                    break;
-                case "medium":
-                    lives = 3;
-                    break;
-                case "hard":
-                    lives = 1;
-                    break;
-                default:
-                    lives = 3;
-            }
-            
-            fetchText();
-            updateLivesDisplay(); // Update lives display immediately after reset
+            // Reset lives and time based on difficulty for next game
+            resetLivesAndTime();
         } else {
             note.innerHTML = "Not Correct!";
+            
+            // Reset timer for a new attempt on the same puzzle
+            resetTime();
+            clearInterval(timer);
+            startTimer();
         }
     }
 }
@@ -168,10 +277,6 @@ function startup() {
     document.getElementById("input").value = "";
     document.getElementById('newGameButtonContainer').innerHTML = '<button class="button-62" onclick="newgame()">New Game?</button>';
 }
-
-function goBack() {
-    window.history.back();
-  }
 
 // Randomize floating bananas
 const floatingBananas = document.querySelectorAll('.floating-banana');
