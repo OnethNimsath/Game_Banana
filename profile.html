@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="profile.css">
+    <title>Banana Quest - User Account</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="background-monkey"></div>
+        <h1>
+            <span class="banana-icon">🍌</span>
+            User Account
+            <span class="banana-icon" style="transform: rotate(10deg);">🍌</span>
+        </h1>
+        
+        <div id="loadingMessage" class="loading">Loading player data...</div>
+        
+        <div id="accountContent" style="display: none;">
+            <div class="form-group">
+                <label for="playerName">Player Name:</label>
+                <div class="input-container">
+                    <input type="text" id="playerName">
+                    <button id="saveNameBtn">Save</button>
+                </div>
+                <div id="errorMessage"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" disabled>
+            </div>
+            
+            <div class="stats-box">
+                <div class="stats-title">Player Stats</div>
+                <div class="stat-item">
+                    <div class="stat-name">Highest Score:</div>
+                    <div id="highScore" class="stat-value">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-name">Bananas Collected:</div>
+                    <div id="bananasCollected" class="stat-value">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-name">Games Played:</div>
+                    <div id="gamesPlayed" class="stat-value">0</div>
+                </div>
+            </div>
+            
+            <a href="menu.html" class="menu-button">
+                <span class="banana-icon">🍌</span> Back to Menu
+            </a>
+        </div>
+    </div>
+    <script src="profile.js"></script>
+</body>
+</html>
