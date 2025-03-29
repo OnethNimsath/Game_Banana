@@ -361,3 +361,41 @@ h1 {
     100% { transform: scale(1); }
 }
 
+#extra-life-mini-game {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+}
+.mini-game-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+.mini-game-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-correct {
+    background-color: green;
+    color: white;
+}
+.btn-incorrect {
+    background-color: red;
+    color: white;
+}
+#game-over-screen {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+}
+

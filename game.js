@@ -300,6 +300,8 @@ fallingBananas.forEach(banana => {
     banana.style.animationDelay = `${randomDelay}s`;
 });
 
+
+
 // Start the game with difficulty settings
 // Replace the original startup() call with this
 initializeGame();

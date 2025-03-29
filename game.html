@@ -15,57 +15,74 @@
 
 <body>
 
-    <div class="background"></div>
+  <div class="background"></div>
 
-    <div class="floating-bananas-container">
-        <div class="floating-banana"></div>
-        <div class="floating-banana"></div>
-        <div class="floating-banana"></div>
-        <div class="floating-banana"></div>
-        <div class="floating-banana"></div>
-        <div class="floating-banana"></div>
-        <div class="floating-banana"></div>
-        <div class="floating-banana"></div>
-        <div class="floating-banana"></div>
-        <div class="floating-banana"></div>
-      </div>
-      
-      <div class="falling-bananas">
-        <div class="falling-banana"></div>
-        <div class="falling-banana"></div>
-        <div class="falling-banana"></div>
-        <div class="falling-banana"></div>
-        <div class="falling-banana"></div>
-      </div>
-
-    <div>
-
-      <div class="back-button">
-        <button onclick="goBack()">
-          <i class="arrow left"></i> Back
-        </button>
-      </div>
-      
-        <h1>The Banana Puzzle</h1>
-        <img id="quest" src="https://www.sanfoh.com/uob/banana/data/t70c9af9b2750792cc9835e656cn64.png">
-        <div id="lives">Lives: 3</div>
-        <div>
-            <h2 id="note">Enter the missing digit below:</h2>
-            <input id="input" type="number" step="1" min="0" max="9" autofocus placeholder="Enter a digit">
-            <button class="button-62" onclick="handleInput()">Submit</button>
-        </div>
-        <div id="newGameButtonContainer">
-          <button class="button-62" onclick="newgame()">New Game?</button>
-        </div>
-        <p>
-            <hr>
-        </p>
+  <div class="floating-bananas-container">
+      <div class="floating-banana"></div>
+      <div class="floating-banana"></div>
+      <div class="floating-banana"></div>
+      <div class="floating-banana"></div>
+      <div class="floating-banana"></div>
+      <div class="floating-banana"></div>
+      <div class="floating-banana"></div>
+      <div class="floating-banana"></div>
+      <div class="floating-banana"></div>
+      <div class="floating-banana"></div>
+    </div>
+    
+    <div class="falling-bananas">
+      <div class="falling-banana"></div>
+      <div class="falling-banana"></div>
+      <div class="falling-banana"></div>
+      <div class="falling-banana"></div>
+      <div class="falling-banana"></div>
     </div>
 
-    <script src="game.js"></script>
+  <div id="main-game">
+    <div class="back-button">
+      <button onclick="goBack()">
+        <i class="arrow left"></i> Back
+      </button>
+    </div>
+    
+      <h1>The Banana Puzzle</h1>
+      <img id="quest" src="https://www.sanfoh.com/uob/banana/data/t70c9af9b2750792cc9835e656cn64.png">
+      <div id="lives">Lives: 3</div>
+      <div>
+          <h2 id="note">Enter the missing digit below:</h2>
+          <input id="input" type="number" step="1" min="0" max="9" autofocus placeholder="Enter a digit">
+          <button class="button-62" onclick="handleInput()">Submit</button>
+      </div>
+      <div id="newGameButtonContainer">
+        <button class="button-62" onclick="newgame()">New Game?</button>
+      </div>
+      <p>
+          <hr>
+      </p>
+  </div>
 
-    <audio id="timerAlertSound" src="timer-alert.mp3.wav"></audio>
+  <!-- Game Over Screen -->
+  <div id="game-over-screen">
+      <h2>Game Over!</h2>
+      <p>You've run out of lives.</p>
+      <button class="button-62" onclick="showExtraLifeMiniGame()">Earn Extra Life</button>
+  </div>
 
+  <!-- Extra Life Mini-Game -->
+  <div id="extra-life-mini-game">
+      <h2>Quick Memory Game</h2>
+      <p>Click the correct banana to win an extra life!</p>
+      <div id="banana-choices" class="mini-game-buttons">
+          <button class="mini-game-btn btn-correct" onclick="winExtraLife()">🍌 Correct Banana</button>
+          <button class="mini-game-btn btn-incorrect" onclick="loseExtraLifeAttempt()">🍌 Wrong Banana</button>
+          <button class="mini-game-btn btn-incorrect" onclick="loseExtraLifeAttempt()">🍌 Wrong Banana</button>
+      </div>
+      <p id="mini-game-result"></p>
+  </div>
+
+  <script src="game.js"></script>
+
+  <audio id="timerAlertSound" src="timer-alert.mp3.wav"></audio>
 </body>
 
 </html>
