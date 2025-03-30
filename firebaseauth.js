@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"
 import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -51,15 +51,22 @@ document.addEventListener('DOMContentLoaded', function() {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
-        const userData = {
-          email: email,
-          name: name
-        };
         
-        showMessage('Player account created successfully! Redirecting to login...', 'signUpMessage');
-        
-        // This is where we store the data in Firestore
-        return setDoc(doc(db, "users", user.uid), userData);
+        // Set the display name in Firebase Authentication
+        return updateProfile(user, {
+          displayName: name
+        }).then(() => {
+          // After displayName is updated, proceed to store in Firestore
+          const userData = {
+            email: email,
+            displayName: name  // Changed 'name' to 'displayName' to match profile.js
+          };
+          
+          showMessage('Player account created successfully! Redirecting to login...', 'signUpMessage');
+          
+          // This is where we store the data in Firestore
+          return setDoc(doc(db, "users", user.uid), userData);
+        });
       })
       .then(() => {
         console.log("Document successfully written!");
