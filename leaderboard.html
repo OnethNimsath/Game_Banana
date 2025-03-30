@@ -8,160 +8,27 @@
 </head>
 <body>
     <a href="menu.html" class="back-arrow">←</a>
-    <div class="container">
+    <div id="leaderboard-container" class="container">
         <div class="background-banana"></div>
-        <h1>🍌 Banana Quest</h1>
-        <div class="subtitle">Top Banana Collectors</div>
+        <div class="leaderboard-header">
+            <h1>🍌 Banana Quest</h1>
+            <div class="subtitle">Top Banana Collectors</div>
+        </div>
         
-        <div class="leaderboard-container">
-            <ul class="leaderboard">
-            <li class="leaderboard-item">
-                <div class="rank">1</div>
-                <div class="player-info">
-                    <span class="player-name">MonkeyKing</span>
-                </div>
-                <div class="score">9,856</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">2</div>
-                <div class="player-info">
-                    <span class="player-name">BananaLover</span>
-                </div>
-                <div class="score">8,721</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">3</div>
-                <div class="player-info">
-                    <span class="player-name">PeelMaster</span>
-                </div>
-                <div class="score">7,532</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">4</div>
-                <div class="player-info">
-                    <span class="player-name">YellowNinja</span>
-                </div>
-                <div class="score">6,984</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">5</div>
-                <div class="player-info">
-                    <span class="player-name">GorillaGamer</span>
-                </div>
-                <div class="score">5,876</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">6</div>
-                <div class="player-info">
-                    <span class="player-name">FruitCollector</span>
-                </div>
-                <div class="score">4,991</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">7</div>
-                <div class="player-info">
-                    <span class="player-name">JungleRunner</span>
-                </div>
-                <div class="score">4,205</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">8</div>
-                <div class="player-info">
-                    <span class="player-name">BananaSplit</span>
-                </div>
-                <div class="score">3,782</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">9</div>
-                <div class="player-info">
-                    <span class="player-name">PotassiumKing</span>
-                </div>
-                <div class="score">3,127</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">10</div>
-                <div class="player-info">
-                    <span class="player-name">SlipperyPeel</span>
-                </div>
-                <div class="score">2,845</div>
-            </li>
-            <!-- Added more entries to demonstrate scrolling -->
-            <li class="leaderboard-item">
-                <div class="rank">11</div>
-                <div class="player-info">
-                    <span class="player-name">BananaBot</span>
-                </div>
-                <div class="score">2,732</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">12</div>
-                <div class="player-info">
-                    <span class="player-name">TreeClimber</span>
-                </div>
-                <div class="score">2,581</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">13</div>
-                <div class="player-info">
-                    <span class="player-name">FruitNinja</span>
-                </div>
-                <div class="score">2,347</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">14</div>
-                <div class="player-info">
-                    <span class="player-name">MonkeyTail</span>
-                </div>
-                <div class="score">2,245</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">15</div>
-                <div class="player-info">
-                    <span class="player-name">JungleKing</span>
-                </div>
-                <div class="score">2,103</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">16</div>
-                <div class="player-info">
-                    <span class="player-name">YellowStreak</span>
-                </div>
-                <div class="score">1,974</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">17</div>
-                <div class="player-info">
-                    <span class="player-name">PeelMachine</span>
-                </div>
-                <div class="score">1,855</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">18</div>
-                <div class="player-info">
-                    <span class="player-name">BananaHoarder</span>
-                </div>
-                <div class="score">1,732</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">19</div>
-                <div class="player-info">
-                    <span class="player-name">TopBanana</span>
-                </div>
-                <div class="score">1,621</div>
-            </li>
-            <li class="leaderboard-item">
-                <div class="rank">20</div>
-                <div class="player-info">
-                    <span class="player-name">MonkeyBusiness</span>
-                </div>
-                <div class="score">1,520</div>
-            </li>
-        </ul>
+        <div class="leaderboard-entries">
+            <!-- Leaderboard items will be dynamically generated here by JavaScript -->
         </div>
         
         <a href="menu.html" class="back-button">
             <span class="banana-icon">🍌</span> Back to Menu
         </a>
     </div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Import as a module -->
+    <script type="module" src="leaderboard.js"></script>
 </body>
 </html>
