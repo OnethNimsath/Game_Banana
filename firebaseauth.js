@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"
-import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js"
+import { getFirestore, setDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -59,7 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
           // After displayName is updated, proceed to store in Firestore
           const userData = {
             email: email,
-            displayName: name  // Changed 'name' to 'displayName' to match profile.js
+            displayName: name,  // Changed 'name' to 'displayName' to match profile.js
+            score: 0,           // Initialize score to 0 for new players
+            highScore: 0,       // Track the player's high score
+            lastPlayed: new Date()  // Track when the player last played
           };
           
           showMessage('Player account created successfully! Redirecting to login...', 'signUpMessage');
@@ -86,3 +89,26 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   });
 });
+
+// Function to update player score in Firestore
+// This function can be called from game.js when a player scores
+export function updatePlayerScore(userId, newScore, difficulty) {
+  const db = getFirestore();
+  const userRef = doc(db, "users", userId);
+  
+  // First get the current user data to compare high score
+  return updateDoc(userRef, {
+    score: newScore,
+    lastPlayed: new Date(),
+    // We'll update highScore only if the new score is higher
+    highScore: firebase.firestore.FieldValue.increment(0) // This will be updated in the transaction
+  }).catch((error) => {
+    console.error("Error updating score:", error);
+  });
+}
+
+// Function to get current user
+export function getCurrentUser() {
+  const auth = getAuth();
+  return auth.currentUser;
+}

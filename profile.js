@@ -36,46 +36,36 @@ auth.onAuthStateChanged(user => {
 });
 
 // Load user data from Firestore
-// Load user data from Firestore
 function loadUserData(user) {
     // Set email from auth
     emailInput.value = user.email;
     
-    // Get display name from Auth first (if it exists)
-    const authDisplayName = user.displayName || '';
-    
-    // Fetch additional user data from Firestore
+    // Fetch additional user data from 'users' collection
     db.collection('users').doc(user.uid).get()
         .then(doc => {
             if (doc.exists) {
                 const userData = doc.data();
                 
-                // Try to get name from Firestore first, then fall back to Auth if missing
-                playerNameInput.value = userData.displayName || authDisplayName;
+                // Set player name if it exists in Firestore
+                playerNameInput.value = userData.name || '';
                 
-                // If name is in Auth but not in Firestore, update Firestore
-                if (!userData.displayName && authDisplayName) {
-                    db.collection('users').doc(user.uid).update({
-                        displayName: authDisplayName
-                    });
-                }
-                
-                // Set player stats...
-                highScoreElement.textContent = userData.highScore?.toLocaleString() || '0';
+                // Set player stats if they exist
                 bananasCollectedElement.textContent = userData.bananasCollected?.toLocaleString() || '0';
                 gamesPlayedElement.textContent = userData.gamesPlayed?.toLocaleString() || '0';
             } else {
                 // No Firestore document exists yet, create one with default values
                 db.collection('users').doc(user.uid).set({
-                    displayName: authDisplayName,
+                    name: user.displayName || '',
                     email: user.email,
-                    highScore: 0,
                     bananasCollected: 0,
                     gamesPlayed: 0
                 });
                 
-                playerNameInput.value = authDisplayName;
+                playerNameInput.value = user.displayName || '';
             }
+            
+            // Fetch highest score using player's email (more reliable than name)
+            fetchPlayerHighScore(user.email);
             
             // Show account content
             loadingMessage.style.display = 'none';
@@ -85,6 +75,61 @@ function loadUserData(user) {
             console.error("Error getting user document:", error);
             loadingMessage.textContent = 'Error loading user data. Please try again.';
         });
+}
+
+// Fetch the highest score for a player using email
+function fetchPlayerHighScore(playerEmail) {
+    console.log("Fetching high score for player email:", playerEmail);
+    
+    // First try to fetch by email
+    db.collection('scores')
+        .where('playerEmail', '==', playerEmail)
+        .orderBy('score', 'desc')
+        .limit(1)
+        .get()
+        .then(snapshot => {
+            if (!snapshot.empty) {
+                const highScoreDoc = snapshot.docs[0];
+                const highScore = highScoreDoc.data().score;
+                console.log("Found high score by email:", highScore);
+                highScoreElement.textContent = highScore.toLocaleString();
+            } else {
+                console.log("No scores found by email, trying by player name");
+                // Fallback to fetch by player name for backward compatibility
+                fallbackFetchByPlayerName();
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching high score by email:", error);
+            // Try fallback if the query fails (e.g., missing index)
+            fallbackFetchByPlayerName();
+        });
+        
+    // Fallback function to fetch by player name
+    function fallbackFetchByPlayerName() {
+        const playerName = playerNameInput.value || auth.currentUser.displayName || 'Anonymous';
+        
+        db.collection('scores')
+            .where('playerName', '==', playerName)
+            .orderBy('score', 'desc')
+            .limit(1)
+            .get()
+            .then(snapshot => {
+                if (!snapshot.empty) {
+                    const highScoreDoc = snapshot.docs[0];
+                    const highScore = highScoreDoc.data().score;
+                    console.log("Found high score by name:", highScore);
+                    highScoreElement.textContent = highScore.toLocaleString();
+                } else {
+                    console.log("No scores found for player");
+                    highScoreElement.textContent = '0';
+                }
+            })
+            .catch(error => {
+                console.error("Error in fallback fetch by name:", error);
+                highScoreElement.textContent = '0';
+            });
+    }
 }
 
 // Save player name button functionality
@@ -104,9 +149,9 @@ saveNameBtn.addEventListener('click', function() {
     
     const user = auth.currentUser;
     if (user) {
-        // Update displayName in Firestore
+        // Update name in Firestore
         db.collection('users').doc(user.uid).update({
-            displayName: newName
+            name: newName
         })
         .then(() => {
             // Update displayName in Auth if needed
@@ -120,6 +165,9 @@ saveNameBtn.addEventListener('click', function() {
                 saveNameBtn.disabled = false;
                 saveNameBtn.textContent = 'Save';
             }, 2000);
+            
+            // After updating the name, refresh the high score
+            fetchPlayerHighScore(user.email);
         })
         .catch(error => {
             console.error("Error updating name:", error);
@@ -135,22 +183,28 @@ saveNameBtn.addEventListener('click', function() {
 function updateHighScore(newScore) {
     const user = auth.currentUser;
     if (user) {
+        // Get the current player name
         db.collection('users').doc(user.uid).get()
             .then(doc => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    const currentHighScore = userData.highScore || 0;
-                    
-                    // Only update if new score is higher
-                    if (newScore > currentHighScore) {
-                        return db.collection('users').doc(user.uid).update({
-                            highScore: newScore
-                        });
-                    }
-                }
+                const playerName = doc.exists ? (doc.data().name || user.displayName || 'Anonymous') : (user.displayName || 'Anonymous');
+                
+                // Add new score document in 'scores' collection
+                return db.collection('scores').add({
+                    playerName: playerName,
+                    playerEmail: user.email, // Add email for reliable queries
+                    score: newScore,
+                    difficulty: localStorage.getItem('gameDifficulty') || 'medium', // Get from localStorage
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            })
+            .then(() => {
+                console.log("New score added:", newScore);
+                
+                // Refresh the high score display
+                fetchPlayerHighScore(user.email);
             })
             .catch(error => {
-                console.error("Error updating high score:", error);
+                console.error("Error adding new score:", error);
             });
     }
 }
@@ -159,6 +213,7 @@ function updateHighScore(newScore) {
 function updateGameStats(bananasCollected) {
     const user = auth.currentUser;
     if (user) {
+        // Get the current user document
         db.collection('users').doc(user.uid).get()
             .then(doc => {
                 if (doc.exists) {
@@ -166,11 +221,27 @@ function updateGameStats(bananasCollected) {
                     const currentBananas = userData.bananasCollected || 0;
                     const currentGames = userData.gamesPlayed || 0;
                     
+                    // Update user document with incremented stats
                     return db.collection('users').doc(user.uid).update({
                         bananasCollected: currentBananas + bananasCollected,
                         gamesPlayed: currentGames + 1
                     });
+                } else {
+                    // If the document doesn't exist, create it
+                    return db.collection('users').doc(user.uid).set({
+                        name: user.displayName || '',
+                        email: user.email,
+                        bananasCollected: bananasCollected,
+                        gamesPlayed: 1
+                    });
                 }
+            })
+            .then(() => {
+                console.log("Game stats updated");
+                
+                // Refresh the displayed stats
+                bananasCollectedElement.textContent = (parseInt(bananasCollectedElement.textContent.replace(/,/g, '')) + bananasCollected).toLocaleString();
+                gamesPlayedElement.textContent = (parseInt(gamesPlayedElement.textContent.replace(/,/g, '')) + 1).toLocaleString();
             })
             .catch(error => {
                 console.error("Error updating game stats:", error);

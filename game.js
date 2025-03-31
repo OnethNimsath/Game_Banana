@@ -4,6 +4,21 @@ var lives = 3;
 var difficulty = "medium"; // Default difficulty
 var timer = null;
 var timeLeft = 20; // Default time (will be set based on difficulty)
+var score = 0; // Add score variable
+
+// Firebase configuration - Replace with your own Firebase config
+const firebaseConfig = {
+    apiKey: "AIzaSyDkN-xlEdgk5W7RQJwH8LGV-eOmN7LNF8Y",
+    authDomain: "smart-banana-97744.firebaseapp.com",
+    projectId: "smart-banana-97744",
+    storageBucket: "smart-banana-97744.firebasestorage.app",
+    messagingSenderId: "225178137471",
+    appId: "1:225178137471:web:02a4135eb6347bd7c5204a"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 // Function to navigate back to menu.html when the back button is clicked
 function goBack() {
@@ -12,6 +27,10 @@ function goBack() {
 
 // Initialize game based on selected difficulty
 function initializeGame() {
+    // Reset score when starting a new game
+    score = 0;
+    updateScoreDisplay();
+    
     // Get difficulty from localStorage (or default to medium)
     difficulty = localStorage.getItem('gameDifficulty') || "medium";
     
@@ -50,10 +69,118 @@ function initializeGame() {
         document.getElementById('timer').innerHTML = "Time: " + timeLeft;
     }
     
+    // Create score display if it doesn't exist
+    if (!document.getElementById('score-display')) {
+        let scoreElement = document.createElement("div");
+        scoreElement.id = "score-display";
+        scoreElement.className = "score-display";
+        scoreElement.innerHTML = "Score: 0";
+        
+        // Add after the lives display
+        document.getElementById('lives').after(scoreElement);
+    }
+    
     updateLivesDisplay();
     updateTimerDisplay();
+    updateScoreDisplay();
     startup();
     startTimer();
+}
+
+// Function to update the score display
+function updateScoreDisplay() {
+    const scoreElement = document.getElementById('score-display');
+    if (scoreElement) {
+        scoreElement.innerHTML = "Score: " + score;
+    } else {
+        // Create score element if it doesn't exist
+        let scoreElement = document.createElement("div");
+        scoreElement.id = "score-display";
+        scoreElement.className = "score-display";
+        scoreElement.innerHTML = "Score: " + score;
+        
+        // Add after the lives display
+        document.getElementById('lives').after(scoreElement);
+    }
+}
+
+// Direct score save function - this is the most important part
+function saveScoreToFirestore() {
+    // Get user information
+    const userEmail = localStorage.getItem('userEmail');
+    const userName = localStorage.getItem('userName') || "Player";
+    
+    // Ensure we have a valid user email
+    if (!userEmail) {
+        console.error("No user email found. Cannot save score.");
+        return Promise.resolve(false);
+    }
+    
+    console.log("Saving score for user:", userEmail, "Score:", score);
+    
+    // Get reference to Firestore
+    const db = firebase.firestore();
+    
+    // Get current user document
+    return db.collection('users').doc(userEmail).get()
+        .then((doc) => {
+            // Check if document exists and has highScore field
+            let highScore = 0;
+            if (doc.exists) {
+                const userData = doc.data();
+                highScore = userData.highScore || 0;
+            }
+            
+            // Determine if this is a new high score
+            const isNewHighScore = score > highScore;
+            
+            // Create data object with score
+            const scoreData = {
+                email: userEmail,
+                name: userName,
+                score: score,  // Current score
+                lastPlayed: new Date().toISOString()
+            };
+            
+            // Only update highScore if it's higher than the existing one
+            if (isNewHighScore) {
+                scoreData.highScore = score;
+            }
+            
+            // Use set with merge option to update only the specified fields
+            return db.collection('users').doc(userEmail).set(scoreData, { merge: true })
+                .then(() => {
+                    console.log("Score saved successfully. Current score:", score);
+                    if (isNewHighScore) {
+                        console.log("New high score set:", score);
+                    }
+                    return isNewHighScore;
+                });
+        })
+        .catch((error) => {
+            console.error("Error saving score:", error);
+            return false;
+        });
+}
+
+// Add a function to test saving scores directly
+function testScoreSave() {
+    const testScore = 999;
+    const userEmail = localStorage.getItem('userEmail');
+    console.log("Testing score save for user:", userEmail);
+    
+    if (!userEmail) {
+        console.error("No user email found in localStorage!");
+        return;
+    }
+    
+    firebase.firestore().collection('users').doc(userEmail).set({
+        score: testScore,
+        highScore: testScore,
+        testField: "This is a test"
+    }, { merge: true })
+    .then(() => console.log("Test score saved successfully!"))
+    .catch(error => console.error("Test score save failed:", error));
 }
 
 // Add a visual indicator for the current difficulty
@@ -142,18 +269,50 @@ function handleTimeOut() {
     updateLivesDisplay();
     
     if (lives === 0) {
+        // Game over due to time out
+        clearInterval(timer);
         document.getElementById("note").innerHTML = "Game Over!";
-        document.getElementById('newGameButtonContainer').innerHTML = '<button class="button-62" onclick="newgame()">New Game?</button>';
+        document.getElementById('newGameButtonContainer').innerHTML = `
+            <div class="game-over-message">Final Score: ${score}</div>
+            <button class="button-62" onclick="saveAndStartNewGame()">New Game?</button>
+        `;
         
-        // Reset lives and time based on difficulty for next game
+        // Save the score
+        saveScoreToFirestore()
+            .then((isNewHighScore) => {
+                if (isNewHighScore) {
+                    // Maybe show a "New High Score!" message
+                    console.log("New high score saved!");
+                } else {
+                    console.log("Score saved (not a high score)");
+                }
+            })
+            .catch((error) => {
+                console.error("Error saving score:", error);
+            });
+        
         resetLivesAndTime();
     } else {
+        // Still have lives left
         document.getElementById("note").innerHTML = "Time's Up!";
-        // Reset time and provide a new puzzle
         resetTime();
         fetchText();
         startTimer();
     }
+}
+
+// Function to save score and start new game
+function saveAndStartNewGame() {
+    saveScoreToFirestore()
+        .then((isNewHighScore) => {
+            console.log(isNewHighScore ? "New high score saved!" : "Score saved (not a high score)");
+            newgame();
+        })
+        .catch((error) => {
+            console.error("Error saving score:", error);
+            // Still start a new game even if saving fails
+            newgame();
+        });
 }
 
 function resetTime() {
@@ -201,6 +360,10 @@ function newgame() {
     // Get difficulty from localStorage again in case it changed
     difficulty = localStorage.getItem('gameDifficulty') || "medium";
     
+    // Reset score
+    score = 0;
+    updateScoreDisplay();
+    
     // Reset lives and time
     resetLivesAndTime();
     
@@ -216,36 +379,93 @@ function newgame() {
     startTimer();
 }
 
+// Function for handling incorrect answers
+function handleIncorrectAnswer() {
+    lives--;
+    updateLivesDisplay();
+    
+    if (lives === 0) {
+        // Game over due to wrong answer
+        clearInterval(timer);
+        document.getElementById("note").innerHTML = "Game Over!";
+        document.getElementById('newGameButtonContainer').innerHTML = `
+            <div class="game-over-message">Final Score: ${score}</div>
+            <button class="button-62" onclick="saveAndStartNewGame()">New Game?</button>
+        `;
+        
+        // Save the score
+        saveScoreToFirestore()
+            .then((isNewHighScore) => {
+                if (isNewHighScore) {
+                    console.log("New high score saved!");
+                } else {
+                    console.log("Score saved (not a high score)");
+                }
+            })
+            .catch((error) => {
+                console.error("Error saving score:", error);
+            });
+        
+        resetLivesAndTime();
+    } else {
+        // Still have lives left
+        document.getElementById("note").innerHTML = "Not Correct!";
+        resetTime();
+        clearInterval(timer);
+        startTimer();
+    }
+}
+
 function handleInput() {
     let inp = document.getElementById("input");
     let note = document.getElementById("note");
+    
     if (parseInt(inp.value) === solution) {
         // Stop the timer
         clearInterval(timer);
         
-        note.innerHTML = 'Correct!';
-        document.getElementById('newGameButtonContainer').innerHTML = '<button class="button-62" onclick="newgame()">New Game?</button>';
-    } else {
-        lives--;
-        updateLivesDisplay();
-        if (lives === 0) {
-            // Stop the timer
-            clearInterval(timer);
-            
-            note.innerHTML = "Game Over!";
-            document.getElementById('newGameButtonContainer').innerHTML = '<button class="button-62" onclick="newgame()">New Game?</button>';
-            
-            // Reset lives and time based on difficulty for next game
-            resetLivesAndTime();
-        } else {
-            note.innerHTML = "Not Correct!";
-            
-            // Reset timer for a new attempt on the same puzzle
-            resetTime();
-            clearInterval(timer);
-            startTimer();
+        // Calculate score based on difficulty and time left
+        let timeBonus = 0;
+        switch(difficulty) {
+            case "easy":
+                // Lower points for easy mode
+                timeBonus = timeLeft * 5;
+                score += 100 + timeBonus;
+                break;
+            case "medium":
+                // Medium points
+                timeBonus = timeLeft * 10;
+                score += 200 + timeBonus;
+                break;
+            case "hard":
+                // Highest points for hard mode
+                timeBonus = timeLeft * 20;
+                score += 300 + timeBonus;
+                break;
         }
+        
+        updateScoreDisplay();
+        
+        // Display score with the correct answer
+        note.innerHTML = `Correct! +${100 + timeBonus} points`;
+        document.getElementById('newGameButtonContainer').innerHTML = `
+            <div class="score-message">Current Score: ${score}</div>
+            <button class="button-62" onclick="nextPuzzle()">Next Puzzle</button>
+        `;
+    } else {
+        // Use the handleIncorrectAnswer function for wrong answers
+        handleIncorrectAnswer();
     }
+}
+
+// Function to move to next puzzle without resetting score
+function nextPuzzle() {
+    fetchText();
+    document.getElementById("input").value = "";
+    document.getElementById("note").innerHTML = "Enter the missing digit below:";
+    document.getElementById('newGameButtonContainer').innerHTML = '';
+    resetTime();
+    startTimer();
 }
 
 function updateLivesDisplay() {
@@ -275,7 +495,133 @@ function startQuest(data) {
 function startup() {
     fetchText();
     document.getElementById("input").value = "";
-    document.getElementById('newGameButtonContainer').innerHTML = '<button class="button-62" onclick="newgame()">New Game?</button>';
+    document.getElementById('newGameButtonContainer').innerHTML = '';
+}
+
+// Function to show leaderboard
+function showLeaderboard() {
+    // Create a leaderboard container
+    const leaderboardContainer = document.createElement('div');
+    leaderboardContainer.id = 'leaderboard-container';
+    leaderboardContainer.className = 'leaderboard-container';
+    
+    // Add a close button
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = 'X';
+    closeButton.className = 'leaderboard-close-btn';
+    closeButton.onclick = () => {
+        document.body.removeChild(leaderboardContainer);
+    };
+    
+    // Create leaderboard content
+    const content = document.createElement('div');
+    content.innerHTML = '<h2>Leaderboard</h2><div id="leaderboard-loading">Loading scores...</div>';
+    
+    // Add elements to container
+    leaderboardContainer.appendChild(closeButton);
+    leaderboardContainer.appendChild(content);
+    
+    // Add to body
+    document.body.appendChild(leaderboardContainer);
+    
+    // Fetch scores from Firestore
+    fetchLeaderboardScores();
+}
+
+// Fetch leaderboard scores from Firestore
+async function fetchLeaderboardScores() {
+    try {
+        // Get top 10 scores
+        const scoresRef = db.collection('users');
+        const snapshot = await scoresRef.orderBy('highScore', 'desc').limit(10).get();
+        
+        let tableHTML = `
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>High Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        let rank = 1;
+        snapshot.forEach(doc => {
+            const userData = doc.data();
+            tableHTML += `
+                <tr>
+                    <td>${rank}</td>
+                    <td>${userData.name || 'Unknown'}</td>
+                    <td>${userData.highScore || 0}</td>
+                </tr>
+            `;
+            rank++;
+        });
+        
+        tableHTML += `</tbody></table>`;
+        
+        // If no scores found
+        if (rank === 1) {
+            document.getElementById('leaderboard-loading').innerHTML = 'No scores found yet!';
+        } else {
+            document.getElementById('leaderboard-loading').innerHTML = tableHTML;
+        }
+    } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+        document.getElementById('leaderboard-loading').innerHTML = 'Error loading leaderboard.';
+    }
+}
+
+// Extra functions for mini-game
+
+// Show extra life mini game
+function showExtraLifeMiniGame() {
+    document.getElementById('game-over-screen').style.display = 'none';
+    document.getElementById('extra-life-mini-game').style.display = 'block';
+    
+    // Randomize the correct banana position
+    const buttons = document.querySelectorAll('.mini-game-btn');
+    const correctIndex = Math.floor(Math.random() * buttons.length);
+    
+    buttons.forEach((btn, index) => {
+        if (index === correctIndex) {
+            btn.classList.add('btn-correct');
+            btn.classList.remove('btn-incorrect');
+            btn.onclick = winExtraLife;
+        } else {
+            btn.classList.add('btn-incorrect');
+            btn.classList.remove('btn-correct');
+            btn.onclick = loseExtraLifeAttempt;
+        }
+    });
+}
+
+// Win extra life
+function winExtraLife() {
+    lives++;
+    updateLivesDisplay();
+    document.getElementById('mini-game-result').innerHTML = 'You won an extra life!';
+    
+    // Hide mini-game after a delay
+    setTimeout(() => {
+        document.getElementById('extra-life-mini-game').style.display = 'none';
+        document.getElementById('main-game').style.display = 'block';
+        resetTime();
+        startTimer();
+    }, 1500);
+}
+
+// Lose extra life attempt
+function loseExtraLifeAttempt() {
+    document.getElementById('mini-game-result').innerHTML = 'Sorry, wrong choice!';
+    
+    // Hide mini-game after a delay
+    setTimeout(() => {
+        document.getElementById('extra-life-mini-game').style.display = 'none';
+        document.getElementById('game-over-screen').style.display = 'block';
+    }, 1500);
 }
 
 // Randomize floating bananas
@@ -300,8 +646,5 @@ fallingBananas.forEach(banana => {
     banana.style.animationDelay = `${randomDelay}s`;
 });
 
-
-
 // Start the game with difficulty settings
-// Replace the original startup() call with this
 initializeGame();

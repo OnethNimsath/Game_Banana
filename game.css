@@ -399,3 +399,29 @@ h1 {
     border-radius: 10px;
 }
 
+
+/* Score display styling */
+.score-display {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #4A89DC;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.score-message {
+    font-size: 1.3rem;
+    color: #8CC152;
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.game-over-message {
+    font-size: 1.4rem;
+    color: #E9573F;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: bold;
+}
+
