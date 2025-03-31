@@ -1,34 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="leaderboard.css">
-    <title>Banana Quest - Leaderboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="leaderboard.css">
+  <script type="module" src="leaderboard.js"></script>
+  <title>Banana Quest - Leaderboard</title>
 </head>
 <body>
-    <a href="menu.html" class="back-arrow">←</a>
-    <div id="leaderboard-container" class="container">
-        <div class="background-banana"></div>
-        <div class="leaderboard-header">
-            <h1>🍌 Banana Quest</h1>
-            <div class="subtitle">Top Banana Collectors</div>
-        </div>
-        
-        <div class="leaderboard-entries">
-            <!-- Leaderboard items will be dynamically generated here by JavaScript -->
-        </div>
-        
-        <a href="menu.html" class="back-button">
-            <span class="banana-icon">🍌</span> Back to Menu
-        </a>
+  <div class="background"></div>
+
+  <div class="floating-bananas-container">
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+    <div class="floating-banana"></div>
+  </div>
+
+  <div class="falling-bananas">
+    <div class="falling-banana"></div>
+    <div class="falling-banana"></div>
+    <div class="falling-banana"></div>
+    <div class="falling-banana"></div>
+    <div class="falling-banana"></div>
+  </div>
+
+  <div class="leaderboard-container">
+    <div class="back-button" onclick="window.location.href='menu.html'">
+      <div class="arrow left"></div>
+      Back to Menu
     </div>
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <h1>Banana Shooter Leaderboard</h1>
     
-    <!-- Import as a module -->
-    <script type="module" src="leaderboard.js"></script>
+    <div id="shooter-leaderboard" class="leaderboard-table-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading scores...</p>
+    </div>
+    
 </body>
 </html>

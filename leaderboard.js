@@ -1,8 +1,8 @@
 // Import Firebase modules
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getFirestore, collection, query, orderBy, limit, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-// Your Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDkN-xlEdgk5W7RQJwH8LGV-eOmN7LNF8Y",
   authDomain: "smart-banana-97744.firebaseapp.com",
@@ -14,129 +14,183 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = getFirestore();
 
-// Class to handle leaderboard functionality
-class Leaderboard {
-  constructor(difficulty = 'easy', maxEntries = 20) {
-    this.difficulty = difficulty;
-    this.maxEntries = maxEntries;
-    this.leaderboardData = [];
-    this.leaderboardContainer = document.querySelector('.leaderboard-entries');
-  }
+// DOM Elements
+document.addEventListener('DOMContentLoaded', () => {
+  // Load shooter leaderboard
+  loadShooterLeaderboard();
+  // Load player stats
+  loadPlayerStats();
+});
 
-  // Fetch top scores from Firestore
-  async fetchTopScores() {
-    try {
-      // Query scores collection for the specified difficulty, ordered by score descending
-      const scoresQuery = query(
-        collection(db, 'scores'),
-        where('difficulty', '==', this.difficulty),
-        orderBy('score', 'desc'),
-        limit(this.maxEntries)
-      );
-      
-      const scoresSnapshot = await getDocs(scoresQuery);
-      const scores = [];
-      
-      // Process each score document
-      for (const scoreDoc of scoresSnapshot.docs) {
-        const scoreData = scoreDoc.data();
-        let playerInfo = { displayName: scoreData.playerName };
-        
-        // If it's not "Anonymous", try to get the user details
-        if (scoreData.playerName !== 'Anonymous') {
-          // Try to find user by name
-          const usersQuery = query(
-            collection(db, 'users'),
-            where('name', '==', scoreData.playerName)
-          );
-          
-          const usersSnapshot = await getDocs(usersQuery);
-          
-          if (!usersSnapshot.empty) {
-            const userData = usersSnapshot.docs[0].data();
-            playerInfo = {
-              displayName: userData.displayName || userData.name,
-              email: userData.email
-            };
-          }
-        }
-        
-        scores.push({
-          playerName: playerInfo.displayName,
-          playerEmail: playerInfo.email,
-          score: scoreData.score,
-          timestamp: scoreData.timestamp
-        });
-      }
-      
-      this.leaderboardData = scores;
-      return scores;
-    } catch (error) {
-      console.error('Error fetching leaderboard data:', error);
-      return [];
-    }
-  }
+// Load Shooter Game Leaderboard
+async function loadShooterLeaderboard() {
+    
+  const leaderboardContainer = document.getElementById('shooter-leaderboard');
   
-  // Render the leaderboard in the container
-  renderLeaderboard() {
-    if (!this.leaderboardContainer) {
-      console.error('Leaderboard entries container not found!');
+  try {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, orderBy("shooterHighScore", "desc"), limit(10));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      leaderboardContainer.innerHTML = '<p class="no-data">No scores recorded yet. Be the first to play!</p>';
       return;
     }
     
-    // Clear existing content
-    this.leaderboardContainer.innerHTML = '';
+    let tableHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>High Score</th>
+            <th>Last Played</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
     
-    // Add each entry
-    this.leaderboardData.forEach((entry, index) => {
-      const entryElement = document.createElement('div');
-      entryElement.className = 'leaderboard-entry';
+    let rank = 1;
+    let hasScores = false;
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
       
-      // Apply special styling for top 3
-      if (index < 3) {
-        entryElement.classList.add(`rank-${index + 1}`);
+      // Skip entries with no shooter score
+      if (!data.shooterHighScore) return;
+      
+      hasScores = true;
+      const playerName = data.displayName || doc.id.split('@')[0];
+      const highScore = data.shooterHighScore || 0;
+      
+      let lastPlayed = 'Never';
+      if (data.lastPlayedShooter) {
+        const date = data.lastPlayedShooter.toDate ? data.lastPlayedShooter.toDate() : new Date(data.lastPlayedShooter);
+        lastPlayed = date.toLocaleDateString();
       }
       
-      entryElement.innerHTML = `
-        <div class="rank">${index + 1}</div>
-        <div class="player-info">
-          <span class="player-name">${entry.playerName}</span>
-        </div>
-        <div class="score">${entry.score.toLocaleString()}</div>
+      const rowClass = rank <= 3 ? `rank-${rank}` : '';
+      
+      tableHTML += `
+        <tr class="${rowClass}">
+          <td>${rank}</td>
+          <td>${playerName}</td>
+          <td>${highScore}</td>
+          <td>${lastPlayed}</td>
+        </tr>
       `;
       
-      this.leaderboardContainer.appendChild(entryElement);
+      rank++;
     });
-  }
-  
-  // Initialize the leaderboard
-  async initialize() {
-    await this.fetchTopScores();
-    this.renderLeaderboard();
-  }
-  
-  // Change difficulty and refresh the leaderboard
-  async changeDifficulty(difficulty) {
-    this.difficulty = difficulty;
-    await this.initialize();
+    
+    // If no shooter scores were found
+    if (!hasScores) {
+      leaderboardContainer.innerHTML = '<p class="no-data">No scores recorded yet. Be the first to play!</p>';
+      return;
+    }
+    
+    tableHTML += '</tbody></table>';
+    leaderboardContainer.innerHTML = tableHTML;
+    
+  } catch (error) {
+    console.error("Error fetching shooter leaderboard:", error);
+    leaderboardContainer.innerHTML = '<p class="error">Failed to load leaderboard. Please try again later.</p>';
   }
 }
 
-// Initialize and display the leaderboard when the DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  const leaderboard = new Leaderboard();
-  leaderboard.initialize();
+// Load Current Player Stats
+async function loadPlayerStats() {
+  const playerStatsContainer = document.getElementById('player-stats');
   
-  // Optional: Add difficulty selector
-  const difficultySelector = document.getElementById('difficulty-selector');
-  if (difficultySelector) {
-    difficultySelector.addEventListener('change', (e) => {
-      leaderboard.changeDifficulty(e.target.value);
-    });
+  // Check if user is logged in by getting player email from localStorage
+  const playerEmail = localStorage.getItem('userEmail');
+  
+  if (!playerEmail) {
+    playerStatsContainer.innerHTML = '<p>Please log in to view your statistics.</p>';
+    return;
   }
-});
+  
+  try {
+    // Fetch current user's data from Firestore
+    const usersCollection = collection(db, "users");
+    const q = query(usersCollection);
+    const querySnapshot = await getDocs(q);
+    
+    // Find user by email
+    let userData = null;
+    let playerDoc = null;
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.email === playerEmail) {
+        userData = data;
+        playerDoc = doc.id;
+      }
+    });
+    
+    if (!userData) {
+      playerStatsContainer.innerHTML = '<p>No statistics found for your account.</p>';
+      return;
+    }
+    
+    // Get shooter ranking
+    const shooterRanking = await getPlayerRanking(playerDoc, "shooterHighScore");
+    
+    // Format stats
+    const shooterHighScore = userData.shooterHighScore || 0;
+    const playerName = userData.displayName || playerEmail.split('@')[0];
+    
+    // If player has no shooter score yet
+    if (!userData.shooterHighScore) {
+      playerStatsContainer.innerHTML = `
+        <h4>Player: ${playerName}</h4>
+        <p>You haven't played the Banana Shooter game yet. Play now to get on the leaderboard!</p>
+      `;
+      return;
+    }
+    
+    playerStatsContainer.innerHTML = `
+      <h4>Player: ${playerName}</h4>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h4>Your High Score</h4>
+          <div class="stat-value">${shooterHighScore}</div>
+          <div class="rank">Rank: ${shooterRanking}</div>
+        </div>
+      </div>
+    `;
+  } catch (error) {
+    console.error("Error fetching player stats:", error);
+    playerStatsContainer.innerHTML = '<p class="error">Failed to load your statistics. Please try again later.</p>';
+  }
+}
 
-// Export for use in other modules
-export default Leaderboard;
+// Get player ranking
+async function getPlayerRanking(playerId, scoreField) {
+  try {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, orderBy(scoreField, "desc"));
+    const querySnapshot = await getDocs(q);
+    
+    let rank = 1;
+    let playerRank = "N/A";
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      // Skip entries with no score in this category
+      if (!data[scoreField]) return;
+      
+      if (doc.id === playerId) {
+        playerRank = rank;
+      }
+      rank++;
+    });
+    
+    return playerRank;
+  } catch (error) {
+    console.error(`Error getting ranking for ${scoreField}:`, error);
+    return "N/A";
+  }
+}

@@ -1,225 +1,311 @@
-/* Leaderboard Styles */
-:root {
-    --banana-yellow: #FFD700;
-    --banana-dark: #906700;
-    --banana-bg: #FFF8E1;
-    --rank1-color: #FFD700;
-    --rank2-color: #C0C0C0;
-    --rank3-color: #CD7F32;
-  }
-  
-  body {
-    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
-    background-color: var(--banana-bg);
-    background-image: repeating-linear-gradient(
-      45deg,
-      rgba(255, 215, 0, 0.2),
-      rgba(255, 215, 0, 0.2) 10px,
-      rgba(255, 215, 0, 0.3) 10px,
-      rgba(255, 215, 0, 0.3) 20px
-    );
+body {
+    font-family: 'Arial', sans-serif;
+    color: #141200;
+    background: #f7e987;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
+    overflow-x: hidden;
   }
   
-  .container {
-    background-color: white;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 600px;
-    padding: 20px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+  .background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('monkey-image.jpg'); /* Make sure this matches your existing image */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    opacity: 0.2;
+    z-index: -2;
   }
   
-  .background-banana {
+  .floating-bananas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+  
+  .floating-banana {
     position: absolute;
-    width: 200px;
-    height: 200px;
-    background-color: rgba(255, 215, 0, 0.1);
-    border-radius: 50%;
-    top: -100px;
-    right: -100px;
-    z-index: 0;
+    width: 50px;
+    height: 50px;
+    background-image: url('Banana-01.png'); /* Make sure this matches your existing image */
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: float 5s linear infinite;
   }
   
-  .banana-icon {
-    font-size: 20px;
-    margin-right: 5px;
-    display: inline-block;
+  .floating-banana:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+  .floating-banana:nth-child(2) { top: 20%; left: 30%; animation-delay: 1s; }
+  .floating-banana:nth-child(3) { top: 30%; left: 50%; animation-delay: 2s; }
+  .floating-banana:nth-child(4) { top: 40%; left: 70%; animation-delay: 3s; }
+  .floating-banana:nth-child(5) { top: 50%; left: 90%; animation-delay: 4s; }
+  .floating-banana:nth-child(6) { top: 60%; left: 5%; animation-delay: 1.5s; }
+  .floating-banana:nth-child(7) { top: 70%; left: 25%; animation-delay: 2.5s; }
+  .floating-banana:nth-child(8) { top: 80%; left: 45%; animation-delay: 3.5s; }
+  .floating-banana:nth-child(9) { top: 90%; left: 65%; animation-delay: 0.5s; }
+  .floating-banana:nth-child(10) { top: 5%; left: 85%; animation-delay: 2s; }
+  
+  @keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(20px); }
+    100% { transform: translateY(0); }
   }
   
-  .leaderboard-header {
-    margin-bottom: 20px;
+  .falling-bananas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+  
+  .falling-banana {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-image: url('banana.png'); /* Make sure this matches your existing image */
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: fall 7s linear infinite;
+  }
+  
+  .falling-banana:nth-child(1) { left: 5%; animation-delay: 0s; }
+  .falling-banana:nth-child(2) { left: 25%; animation-delay: 2s; }
+  .falling-banana:nth-child(3) { left: 45%; animation-delay: 4s; }
+  .falling-banana:nth-child(4) { left: 65%; animation-delay: 6s; }
+  .falling-banana:nth-child(5) { left: 85%; animation-delay: 1s; }
+  
+  @keyframes fall {
+    0% { transform: translateY(-50px); }
+    100% { transform: translateY(100vh); }
+  }
+  
+  .leaderboard-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 900px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     position: relative;
     z-index: 1;
   }
   
   h1 {
-    color: var(--banana-dark);
+    text-align: center;
+    color: #8B5A00;
     font-size: 2.5rem;
-    margin: 0;
-    font-weight: bold;
-  }
-  
-  .subtitle {
-    color: var(--banana-dark);
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-  }
-  
-  #difficulty-selector {
-    margin-bottom: 20px;
-    padding: 8px 15px;
-    border-radius: 20px;
-    border: 2px solid var(--banana-dark);
-    font-family: inherit;
-    font-size: 1rem;
-    background-color: white;
-    color: var(--banana-dark);
-    cursor: pointer;
-    position: relative;
-    z-index: 1;
-  }
-  
-  .leaderboard-entries {
     margin-bottom: 30px;
-    max-height: 400px;
-    overflow-y: auto;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2 {
+    color: #8B5A00;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  h3 {
+    color: #8B5A00;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+  
+  .leaderboard-table-container {
+    margin-bottom: 30px;
+    min-height: 300px;
     position: relative;
-    z-index: 1;
   }
   
-  .leaderboard-entry {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    margin: 8px 0;
-    background-color: var(--banana-yellow);
-    border-radius: 50px;
-    color: var(--banana-dark);
-    font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   
-  .rank {
-    background-color: white;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  thead {
+    background-color: #ffcc00;
+  }
+  
+  th, td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  th {
     font-weight: bold;
   }
   
-  .player-name, .player-info {
-    flex-grow: 1;
-    text-align: left;
-    margin-left: 15px;
-    font-size: 1.1rem;
+  tbody tr:nth-child(even) {
+    background-color: rgba(255, 204, 0, 0.1);
   }
   
-  .score {
-    font-size: 1.2rem;
-    background-color: white;
-    border-radius: 20px;
-    padding: 5px 15px;
+  tbody tr:hover {
+    background-color: rgba(255, 204, 0, 0.3);
+    transition: background-color 0.3s ease;
   }
   
-  /* Special styling for top 3 ranks */
+  .rank-1, .rank-2, .rank-3 {
+    font-weight: bold;
+  }
+  
   .rank-1 {
-    background-color: var(--rank1-color);
-    box-shadow: 0 3px 10px rgba(255, 215, 0, 0.5);
-    transform: scale(1.05);
+    background-color: rgba(255, 215, 0, 0.3); /* Gold */
   }
   
   .rank-2 {
-    background-color: var(--rank2-color);
-    box-shadow: 0 3px 8px rgba(192, 192, 192, 0.5);
-    transform: scale(1.03);
+    background-color: rgba(192, 192, 192, 0.3); /* Silver */
   }
   
   .rank-3 {
-    background-color: var(--rank3-color);
-    box-shadow: 0 3px 8px rgba(205, 127, 50, 0.5);
-    transform: scale(1.01);
+    background-color: rgba(205, 127, 50, 0.3); /* Bronze */
   }
   
-  .back-arrow {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    font-size: 2rem;
-    color: var(--banana-dark);
-    text-decoration: none;
-    z-index: 2;
+  .your-stats {
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+  }
+  
+  .stat-card {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .stat-card h4 {
+    margin-top: 0;
+    color: #8B5A00;
+  }
+  
+  .stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff9900;
   }
   
   .back-button {
-    background-color: var(--banana-dark);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 12px 30px;
-    font-size: 1.1rem;
-    font-weight: bold;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px 15px;
+    background-color: #f8c156;
+    border-radius: 5px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-block;
-    position: relative;
-    z-index: 1;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
   }
   
   .back-button:hover {
-    background-color: #7D5900;
+    background-color: #ffb524;
     transform: translateY(-2px);
   }
   
-  /* Custom scrollbar for the leaderboard */
-  .leaderboard-entries::-webkit-scrollbar {
-    width: 8px;
+  .arrow {
+    border: solid #333;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    margin-right: 8px;
   }
   
-  .leaderboard-entries::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
+  .left {
+    transform: rotate(135deg);
   }
   
-  .leaderboard-entries::-webkit-scrollbar-thumb {
-    background: var(--banana-dark);
-    border-radius: 10px;
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 204, 0, 0.3);
+    border-radius: 50%;
+    border-top: 5px solid #ffcc00;
+    animation: spin 1s linear infinite;
+    margin: 50px auto 20px;
   }
   
-  .leaderboard-entries::-webkit-scrollbar-thumb:hover {
-    background: #7D5900;
+  .loading-text {
+    text-align: center;
+    color: #8B5A00;
+    font-style: italic;
   }
   
-  /* Responsive adjustments */
-  @media (max-width: 500px) {
-    .leaderboard-entry {
-      padding: 10px 15px;
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .no-data {
+    text-align: center;
+    color: #8B5A00;
+    font-style: italic;
+    margin: 50px 0;
+    font-size: 18px;
+  }
+  
+  .error {
+    text-align: center;
+    color: #E9573F;
+    font-style: italic;
+    margin: 50px 0;
+    font-size: 18px;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .leaderboard-container {
+      margin: 20px;
+      padding: 20px;
     }
     
-    .player-name {
-      font-size: 0.9rem;
+    h1 {
+      font-size: 2rem;
     }
     
-    .score {
-      font-size: 1rem;
+    th, td {
+      padding: 10px;
+      font-size: 14px;
     }
+    
+    .back-button {
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+  }
   
-    .back-arrow {
-      top: 10px;
-      left: 10px;
-      font-size: 1.5rem;
+  @media (max-width: 480px) {
+    th, td {
+      padding: 8px;
+      font-size: 12px;
+    }
+    
+    .stats-grid {
+      grid-template-columns: 1fr;
     }
   }
