@@ -40,32 +40,73 @@ function loadUserData(user) {
     // Set email from auth
     emailInput.value = user.email;
     
-    // Fetch additional user data from 'users' collection
+    // Set loading messages
+    highScoreElement.textContent = "Loading...";
+    bananasCollectedElement.textContent = "Loading...";
+    gamesPlayedElement.textContent = "Loading...";
+    
+    console.log("Loading user data for:", user.email);
+    
+    // Fetch additional user data from 'users' collection using UID
     db.collection('users').doc(user.uid).get()
         .then(doc => {
             if (doc.exists) {
                 const userData = doc.data();
+                console.log("Found user document:", userData);
                 
-                // Set player name if it exists in Firestore
-                playerNameInput.value = userData.name || '';
+                // Set player name if it exists in Firestore - CHECK FOR DISPLAY NAME FIRST
+                playerNameInput.value = userData.displayName || userData.name || '';
+                
+                // If name is still empty, try to get it from localStorage or sessionStorage
+                if (!playerNameInput.value) {
+                    playerNameInput.value = localStorage.getItem('playerName') || 
+                                           sessionStorage.getItem('playerName') || 
+                                           user.email.split('@')[0] || '';
+                }
                 
                 // Set player stats if they exist
                 bananasCollectedElement.textContent = userData.bananasCollected?.toLocaleString() || '0';
                 gamesPlayedElement.textContent = userData.gamesPlayed?.toLocaleString() || '0';
+                
+                // Set shooter high score directly from user document
+                if (userData.shooterHighScore) {
+                    console.log("Found shooter high score in user document:", userData.shooterHighScore);
+                    highScoreElement.textContent = userData.shooterHighScore.toLocaleString();
+                } else {
+                    console.log("No shooter high score found in user document");
+                    highScoreElement.textContent = '0';
+                }
+                
+                // Save the name back to Firestore if we got it from another source but it's not in Firestore
+                if (playerNameInput.value && !userData.displayName && !userData.name) {
+                    db.collection('users').doc(user.uid).update({
+                        displayName: playerNameInput.value
+                    }).catch(error => console.error("Error updating displayName:", error));
+                }
             } else {
+                console.log("No user document found, creating one");
+                // Try to get name from session or localStorage
+                const storedName = localStorage.getItem('playerName') || 
+                                   sessionStorage.getItem('playerName') || 
+                                   user.email.split('@')[0] || '';
+                
                 // No Firestore document exists yet, create one with default values
                 db.collection('users').doc(user.uid).set({
-                    name: user.displayName || '',
+                    displayName: storedName,
                     email: user.email,
                     bananasCollected: 0,
-                    gamesPlayed: 0
+                    gamesPlayed: 0,
+                    shooterHighScore: 0
                 });
                 
-                playerNameInput.value = user.displayName || '';
+                playerNameInput.value = storedName;
+                highScoreElement.textContent = '0';
+                bananasCollectedElement.textContent = '0';
+                gamesPlayedElement.textContent = '0';
             }
             
-            // Fetch highest score using player's email (more reliable than name)
-            fetchPlayerHighScore(user.email);
+            // Also search by email in users collection to find all documents related to this user
+            searchUsersByEmail(user.email, user.uid);
             
             // Show account content
             loadingMessage.style.display = 'none';
@@ -74,61 +115,75 @@ function loadUserData(user) {
         .catch(error => {
             console.error("Error getting user document:", error);
             loadingMessage.textContent = 'Error loading user data. Please try again.';
+            
+            // Still show account content with default values
+            highScoreElement.textContent = '0';
+            bananasCollectedElement.textContent = '0';
+            gamesPlayedElement.textContent = '0';
+            loadingMessage.style.display = 'none';
+            accountContent.style.display = 'block';
         });
 }
 
-// Fetch the highest score for a player using email
-function fetchPlayerHighScore(playerEmail) {
-    console.log("Fetching high score for player email:", playerEmail);
+// Function to search for user documents by email
+function searchUsersByEmail(email, currentUserId) {
+    console.log("Searching for user documents with email:", email);
     
-    // First try to fetch by email
-    db.collection('scores')
-        .where('playerEmail', '==', playerEmail)
-        .orderBy('score', 'desc')
-        .limit(1)
+    db.collection('users')
+        .where('email', '==', email)
         .get()
         .then(snapshot => {
-            if (!snapshot.empty) {
-                const highScoreDoc = snapshot.docs[0];
-                const highScore = highScoreDoc.data().score;
-                console.log("Found high score by email:", highScore);
-                highScoreElement.textContent = highScore.toLocaleString();
-            } else {
-                console.log("No scores found by email, trying by player name");
-                // Fallback to fetch by player name for backward compatibility
-                fallbackFetchByPlayerName();
+            console.log("Found", snapshot.size, "documents with matching email");
+            
+            if (snapshot.empty) {
+                // Try alternate field name
+                db.collection('users')
+                    .where('userEmail', '==', email)
+                    .get()
+                    .then(altSnapshot => {
+                        processUserDocuments(altSnapshot.docs, currentUserId);
+                    })
+                    .catch(error => console.error("Error in alternate email search:", error));
+                return;
             }
+            
+            processUserDocuments(snapshot.docs, currentUserId);
         })
         .catch(error => {
-            console.error("Error fetching high score by email:", error);
-            // Try fallback if the query fails (e.g., missing index)
-            fallbackFetchByPlayerName();
+            console.error("Error searching for user by email:", error);
         });
+}
+
+// Process all user documents found
+function processUserDocuments(docs, currentUserId) {
+    let highestShooterScore = parseInt(highScoreElement.textContent.replace(/,/g, '')) || 0;
+    let userDocToUpdate = null;
+    
+    docs.forEach(doc => {
+        const userData = doc.data();
+        console.log("Processing user document:", doc.id, userData);
         
-    // Fallback function to fetch by player name
-    function fallbackFetchByPlayerName() {
-        const playerName = playerNameInput.value || auth.currentUser.displayName || 'Anonymous';
+        if (userData.shooterHighScore && userData.shooterHighScore > highestShooterScore) {
+            highestShooterScore = userData.shooterHighScore;
+            console.log("Found higher shooter score:", highestShooterScore);
+        }
+    });
+    
+    // Update the high score display if we found a higher score
+    if (highestShooterScore > 0) {
+        console.log("Setting highest shooter score:", highestShooterScore);
+        highScoreElement.textContent = highestShooterScore.toLocaleString();
         
-        db.collection('scores')
-            .where('playerName', '==', playerName)
-            .orderBy('score', 'desc')
-            .limit(1)
-            .get()
-            .then(snapshot => {
-                if (!snapshot.empty) {
-                    const highScoreDoc = snapshot.docs[0];
-                    const highScore = highScoreDoc.data().score;
-                    console.log("Found high score by name:", highScore);
-                    highScoreElement.textContent = highScore.toLocaleString();
-                } else {
-                    console.log("No scores found for player");
-                    highScoreElement.textContent = '0';
-                }
-            })
-            .catch(error => {
-                console.error("Error in fallback fetch by name:", error);
-                highScoreElement.textContent = '0';
+        // Also update the current user's document if needed
+        if (parseInt(highScoreElement.textContent.replace(/,/g, '')) < highestShooterScore) {
+            db.collection('users').doc(currentUserId).update({
+                shooterHighScore: highestShooterScore
+            }).then(() => {
+                console.log("Updated user document with highest shooter score");
+            }).catch(error => {
+                console.error("Error updating user document:", error);
             });
+        }
     }
 }
 
@@ -151,7 +206,7 @@ saveNameBtn.addEventListener('click', function() {
     if (user) {
         // Update name in Firestore
         db.collection('users').doc(user.uid).update({
-            name: newName
+            displayName: newName
         })
         .then(() => {
             // Update displayName in Auth if needed
@@ -160,14 +215,15 @@ saveNameBtn.addEventListener('click', function() {
             });
         })
         .then(() => {
+            // Save to localStorage and sessionStorage for cross-page consistency
+            localStorage.setItem('playerName', newName);
+            sessionStorage.setItem('playerName', newName);
+            
             saveNameBtn.textContent = 'Saved!';
             setTimeout(() => {
                 saveNameBtn.disabled = false;
                 saveNameBtn.textContent = 'Save';
             }, 2000);
-            
-            // After updating the name, refresh the high score
-            fetchPlayerHighScore(user.email);
         })
         .catch(error => {
             console.error("Error updating name:", error);
@@ -186,22 +242,31 @@ function updateHighScore(newScore) {
         // Get the current player name
         db.collection('users').doc(user.uid).get()
             .then(doc => {
-                const playerName = doc.exists ? (doc.data().name || user.displayName || 'Anonymous') : (user.displayName || 'Anonymous');
+                const playerName = doc.exists ? 
+                                  (doc.data().displayName || doc.data().name || user.displayName || 'Anonymous') : 
+                                  (user.displayName || localStorage.getItem('playerName') || 'Anonymous');
+                
+                // Also get current high score to see if we need to update it
+                const currentHighScore = doc.exists ? (doc.data().highScore || 0) : 0;
                 
                 // Add new score document in 'scores' collection
-                return db.collection('scores').add({
+                const scorePromise = db.collection('scores').add({
                     playerName: playerName,
                     playerEmail: user.email, // Add email for reliable queries
                     score: newScore,
                     difficulty: localStorage.getItem('gameDifficulty') || 'medium', // Get from localStorage
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-            })
-            .then(() => {
-                console.log("New score added:", newScore);
                 
-                // Refresh the high score display
-                fetchPlayerHighScore(user.email);
+                // Update high score in user document if needed
+                let updatePromise = Promise.resolve();
+                if (newScore > currentHighScore) {
+                    updatePromise = db.collection('users').doc(user.uid).update({
+                        highScore: newScore
+                    });
+                }
+                
+                return Promise.all([scorePromise, updatePromise]);
             })
             .catch(error => {
                 console.error("Error adding new score:", error);
@@ -227,9 +292,15 @@ function updateGameStats(bananasCollected) {
                         gamesPlayed: currentGames + 1
                     });
                 } else {
+                    // Try to get name from various sources
+                    const playerName = localStorage.getItem('playerName') || 
+                                     sessionStorage.getItem('playerName') || 
+                                     user.displayName || 
+                                     user.email.split('@')[0] || '';
+                    
                     // If the document doesn't exist, create it
                     return db.collection('users').doc(user.uid).set({
-                        name: user.displayName || '',
+                        displayName: playerName,
                         email: user.email,
                         bananasCollected: bananasCollected,
                         gamesPlayed: 1
