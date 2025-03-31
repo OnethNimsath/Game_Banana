@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="settings.css">
+    <title>Banana Quest - Settings</title>
+    <!-- Add audio elements for sound testing -->
+    <audio id="testSound" src="data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTguMTYuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV" preload="auto"></audio>
+    <audio id="testMusic" src="data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTguMTYuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV" preload="auto"></audio>
+</head>
+<body>
+    <div class="settings-container">
+        <h1><span class="banana-icon">🍌</span> Settings</h1>
+        
+        <div class="setting-item">
+            <span class="setting-label">Game Sounds</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="soundToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <div class="setting-item">
+            <span class="setting-label">Background Music</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="musicToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <button class="back-button" onclick="saveSettings()"><span class="banana-icon">🍌</span> Save & Return</button>
+    </div>
+
+    <script>
+        // Use URL parameters or parent window communication instead of localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get parameters from URL if they exist
+            const urlParams = new URLSearchParams(window.location.search);
+            const soundEnabled = urlParams.get('sound') !== 'false';
+            const musicEnabled = urlParams.get('music') !== 'false';
+            
+            document.getElementById('soundToggle').checked = soundEnabled;
+            document.getElementById('musicToggle').checked = musicEnabled;
+        });
+        
+        // Function to play test sound
+        function playTestSound() {
+            const testSound = document.getElementById('testSound');
+            testSound.currentTime = 0;
+            testSound.play();
+        }
+        
+        // Function to play test music
+        function playTestMusic() {
+            const testMusic = document.getElementById('testMusic');
+            testMusic.currentTime = 0;
+            testMusic.play();
+        }
+        
+        // Add event listeners to toggles
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up sound toggle listener
+            document.getElementById('soundToggle').addEventListener('change', function() {
+                if (this.checked) {
+                    playTestSound();
+                }
+            });
+            
+            // Set up music toggle listener
+            document.getElementById('musicToggle').addEventListener('change', function() {
+                if (this.checked) {
+                    playTestMusic();
+                }
+            });
+        });
+        
+        function saveSettings() {
+            const soundEnabled = document.getElementById('soundToggle').checked;
+            const musicEnabled = document.getElementById('musicToggle').checked;
+            
+            // Play sounds one more time if enabled
+            if (soundEnabled) {
+                playTestSound();
+            }
+            
+            // Instead of using localStorage, communicate with the parent window/frame
+            if (window.parent && window.parent !== window) {
+                // If in an iframe, send message to parent
+                window.parent.postMessage({
+                    type: 'settings',
+                    sound: soundEnabled,
+                    music: musicEnabled
+                }, '*');
+            } else {
+                // If not in iframe, use URL parameters when returning
+                const returnUrl = 'menu.html?sound=' + soundEnabled + '&music=' + musicEnabled;
+                window.location.href = returnUrl;
+            }
+            
+            // You can also log the settings for debugging
+            console.log('Sound enabled:', soundEnabled);
+            console.log('Music enabled:', musicEnabled);
+        }
+    </script>
+</body>
+</html>
