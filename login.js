@@ -63,12 +63,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const userData = docSnap.data();
         console.log("Retrieved user data:", userData);
         
-        // Set player name in session storage for use in the game
-        sessionStorage.setItem('playerName', userData.name);
+        // Extract username from email if displayName is not available
+        const playerName = userData.displayName || email.split('@')[0];
+        
+        // Store in both sessionStorage and localStorage for different use cases
+        sessionStorage.setItem('playerName', playerName);
         sessionStorage.setItem('playerEmail', userData.email);
         sessionStorage.setItem('playerId', user.uid);
         
-        showMessage(`Welcome back, ${userData.name}! Redirecting to game menu...`, 'loginMessage');
+        // Also store in localStorage for persistence across sessions
+        localStorage.setItem('playerName', playerName);
+        localStorage.setItem('userEmail', userData.email);
+        localStorage.setItem('playerId', user.uid);
+        
+        showMessage(`Welcome back, ${playerName}! Redirecting to game menu...`, 'loginMessage');
         
         // Redirect to game menu after short delay
         console.log("Redirecting to menu.html in 2 seconds...");
@@ -77,7 +85,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 2000);
       } else {
         console.log("No user data found in Firestore!");
-        showMessage("User data not found. Please contact support.", 'loginMessage');
+        
+        // Create a basic user record if none exists
+        const basicUserData = {
+          email: email,
+          displayName: email.split('@')[0],
+          score: 0,
+          highScore: 0,
+          lastPlayed: new Date()
+        };
+        
+        // Store the basic data
+        await setDoc(doc(db, "users", user.uid), basicUserData);
+        
+        // Store in both sessionStorage and localStorage
+        const playerName = email.split('@')[0];
+        sessionStorage.setItem('playerName', playerName);
+        sessionStorage.setItem('playerEmail', email);
+        sessionStorage.setItem('playerId', user.uid);
+        
+        localStorage.setItem('playerName', playerName);
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('playerId', user.uid);
+        
+        showMessage(`Welcome, ${playerName}! Redirecting to game menu...`, 'loginMessage');
+        
+        setTimeout(() => {
+          window.location.href = 'menu.html';
+        }, 2000);
       }
     } catch (error) {
       console.error("Login error:", error);

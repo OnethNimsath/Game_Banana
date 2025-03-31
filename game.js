@@ -373,16 +373,41 @@ function handleInput() {
         
         updateScoreDisplay();
         
-        // Display score with the correct answer
+        // Save the current score to localStorage for the shooter game to access
+        localStorage.setItem('puzzleScore', score);
+        
+        // Display success message
         note.innerHTML = `Correct! +${basePoints + timeBonus} points`;
-        document.getElementById('newGameButtonContainer').innerHTML = `
-            <div class="score-message">Current Score: ${score}</div>
-            <button class="button-62" onclick="nextPuzzle()">Next Puzzle</button>
-        `;
+        
+        // Show redirect message
+        showRedirectMessage("Great job! Redirecting to bonus game...");
+        
+        // Redirect to the shooter game after a delay
+        setTimeout(function() {
+            window.location.href = 'extra_game.html';
+        }, 2000);
     } else {
         // Use the handleIncorrectAnswer function for wrong answers
         handleIncorrectAnswer();
     }
+}
+
+// Function to show a redirect message
+function showRedirectMessage(message) {
+    // Create message container if it doesn't exist
+    let messageContainer = document.getElementById('redirect-message');
+    if (!messageContainer) {
+        messageContainer = document.createElement('div');
+        messageContainer.id = 'redirect-message';
+        document.body.appendChild(messageContainer);
+    }
+    
+    // Set message content and show it
+    messageContainer.innerHTML = message;
+    messageContainer.style.display = 'flex';
+    
+    // Add animation class
+    messageContainer.classList.add('message-animation');
 }
 
 // Function to move to next puzzle without resetting score

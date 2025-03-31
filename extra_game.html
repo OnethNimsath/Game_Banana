@@ -12,14 +12,14 @@
             background-color: #fffacd;
             font-family: Arial, sans-serif;
         }
-
+        
         #game-container {
             position: relative;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
         }
-
+        
         #back-button {
             position: absolute;
             top: 20px;
@@ -32,7 +32,7 @@
             z-index: 100;
             font-weight: bold;
         }
-
+        
         #time-display {
             position: absolute;
             top: 20px;
@@ -45,7 +45,7 @@
             z-index: 100;
             font-weight: bold;
         }
-
+        
         #score-display {
             position: absolute;
             top: 20px;
@@ -57,7 +57,7 @@
             z-index: 100;
             font-weight: bold;
         }
-
+        
         .banana {
             position: absolute;
             width: 50px;
@@ -66,7 +66,7 @@
             background-size: cover;
             z-index: 1;
         }
-
+        
         .bullet {
             position: absolute;
             width: 10px;
@@ -75,7 +75,7 @@
             border-radius: 50%;
             z-index: 2;
         }
-
+        
         #gun {
             position: absolute;
             bottom: 20px;
@@ -89,7 +89,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             border: 2px solid #2c3e50;
         }
-
+        
         #gun-barrel {
             position: absolute;
             bottom: 50px;
@@ -104,7 +104,7 @@
             border-bottom: none;
             box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.2);
         }
-
+        
         #gun:after {
             content: "";
             position: absolute;
@@ -151,7 +151,234 @@
             font-weight: bold;
             font-size: 18px;
         }
+        
+        .welcome-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            border: 3px solid #FFD700; /* Golden border to match banana theme */
+        }
+
+        .welcome-message h3 {
+            color: #4a90e2;
+            margin-top: 0;
+        }
+
+        #start-game-btn {
+            padding: 10px 20px;
+            background-color: #FFD700;
+            border: 2px solid #8b4513;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        #start-game-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .leaderboard-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    max-width: 80%;
+    max-height: 80%;
+    overflow-y: auto;
+    border: 3px solid #FFD700;
+    }
+
+    .leaderboard-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #E9573F;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+
+    .leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    }
+
+    .leaderboard-table th, 
+    .leaderboard-table td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    }
+
+    .leaderboard-table th {
+    background-color: #4a90e2;
+    color: white;
+    }
+
+    .leaderboard-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+    }
+
+    .leaderboard-table tr:hover {
+    background-color: #ffe6a8;
+    }
+
+    .high-score-message {
+    color: #FFD700;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+    margin-bottom: 15px;
+    animation: pulse 1.5s infinite alternate;
+    }
+
+    .leaderboard-btn {
+    padding: 10px 20px;
+    background-color: #4a90e2;
+    border: 2px solid #2c3e50;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: 15px;
+    margin-left: 10px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .leaderboard-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
+    }
+
+    .login-prompt {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+}
+
+.login-message {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 80%;
+    text-align: center;
+    border: 3px solid #FFD700;
+}
+
+.login-message h3 {
+    color: #4a90e2;
+    margin-top: 0;
+    font-size: 24px;
+}
+
+.login-form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#login-email {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+#login-button {
+    padding: 10px 20px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#login-button:hover {
+    background-color: #3a80d2;
+}
+
+.high-score-message {
+    color: #FFD700;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+    margin-bottom: 15px;
+    animation: pulse 1.5s infinite alternate;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+.main-menu-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.main-menu-btn:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
     </style>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
 </head>
 <body>
     <div id="game-container">
@@ -189,9 +416,44 @@
             
             // Game initialization
             function initGame() {
-                score = 0;
-                timeLeft = 30;
-                gameActive = true;
+                // Get the score from the puzzle game if available
+                const puzzleScore = localStorage.getItem('puzzleScore');
+                let bonusTime = 0;
+                
+                // If there's a score from the puzzle game, give a time bonus
+                if (puzzleScore) {
+                    score = parseInt(puzzleScore); // Start with the puzzle score
+                    
+                    // Add bonus time based on the puzzle score
+                    bonusTime = Math.floor(parseInt(puzzleScore) / 100); // 1 second for every 100 points
+                    timeLeft = 30 + bonusTime; // Add bonus time to the default time
+                    
+                    // Show welcome message with bonus info
+                    const welcomeMessage = document.createElement('div');
+                    welcomeMessage.className = 'welcome-message';
+                    welcomeMessage.innerHTML = `
+                        <h3>Welcome to Banana Shooter!</h3>
+                        <p>Your puzzle score: ${puzzleScore} points</p>
+                        <p>Bonus time: +${bonusTime} seconds</p>
+                        <button id="start-game-btn">Start Game</button>
+                    `;
+                    document.body.appendChild(welcomeMessage);
+                    
+                    // Pause game until player clicks start
+                    gameActive = false;
+                    
+                    // Add event listener to start button
+                    document.getElementById('start-game-btn').addEventListener('click', function() {
+                        welcomeMessage.remove();
+                        gameActive = true;
+                        startGame();
+                    });
+                } else {
+                    // Normal initialization without bonus
+                    score = 0;
+                    timeLeft = 30;
+                    startGame();
+                }
                 
                 // Update displays
                 updateScore();
@@ -203,7 +465,10 @@
                 
                 // Hide game over screen
                 gameOverScreen.style.display = 'none';
-                
+            }
+            
+            // Function to start the game timers
+            function startGame() {
                 // Start game timers
                 gameInterval = setInterval(updateGameTime, 1000);
                 bananaInterval = setInterval(createBanana, 1000);
@@ -382,23 +647,287 @@
                 }
             }
             
+            // Event Listeners
+            gameContainer.addEventListener('click', createBullet);
+            playAgainButton.addEventListener('click', initGame);
+            backButton.addEventListener('click', () => {
+                // Navigate back to the main game page
+                window.location.href = 'game.html';
+            });
+
+            // Firebase configuration - make sure this matches your puzzle game's configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyDkN-xlEdgk5W7RQJwH8LGV-eOmN7LNF8Y",
+                authDomain: "smart-banana-97744.firebaseapp.com",
+                projectId: "smart-banana-97744",
+                storageBucket: "smart-banana-97744.firebasestorage.app",
+                messagingSenderId: "225178137471",
+                appId: "1:225178137471:web:02a4135eb6347bd7c5204a"
+            };
+
+            // Initialize Firebase
+            if (!firebase.apps || !firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const db = firebase.firestore();
+
+            // Save shooter score to Firestore
+            function saveShooterScoreToFirestore() {
+                // Get current user email from localStorage
+                const userEmail = localStorage.getItem('userEmail');
+                
+                if (!userEmail) {
+                    console.error("No user email found. Cannot save shooter score.");
+                    showLoginPrompt();
+                    return Promise.resolve(false);
+                }
+
+                console.log("Saving score for user:", userEmail);
+                const userDocRef = db.collection('users').doc(userEmail);
+                
+                return db.runTransaction((transaction) => {
+                    return transaction.get(userDocRef).then((userDoc) => {
+                        const shooterScore = score;
+                        let userData = {};
+                        
+                        if (userDoc.exists) {
+                            userData = userDoc.data();
+                            console.log("Existing user data:", userData);
+                        } else {
+                            console.log("No existing user data found, creating new document");
+                        }
+                        
+                        // Check if shooter high score exists
+                        const currentShooterHighScore = userData.shooterHighScore || 0;
+                        
+                        // Create update data object with all fields we want to ensure exist
+                        const updateData = {
+                            shooterScore: shooterScore,
+                            lastPlayedShooter: firebase.firestore.Timestamp.now()
+                        };
+                        
+                        // Update shooter high score if current score is higher
+                        if (shooterScore > currentShooterHighScore) {
+                            updateData.shooterHighScore = shooterScore;
+                        } else {
+                            // Ensure field exists even if not a new high score
+                            if (!userData.shooterHighScore) {
+                                updateData.shooterHighScore = shooterScore;
+                            }
+                        }
+                        
+                        // Ensure displayName field exists
+                        if (!userData.displayName) {
+                            // Extract username from email if no display name
+                            const username = userEmail.split('@')[0];
+                            updateData.displayName = username;
+                        }
+                        
+                        // Save combined score (puzzle + shooter) if we have both scores
+                        if (userData.score) {
+                            const puzzleScore = userData.score || 0;
+                            const combinedScore = puzzleScore + shooterScore;
+                            updateData.combinedScore = combinedScore;
+                            
+                            // Update combined high score if needed
+                            const currentCombinedHighScore = userData.combinedHighScore || 0;
+                            if (combinedScore > currentCombinedHighScore) {
+                                updateData.combinedHighScore = combinedScore;
+                            } else {
+                                // Ensure field exists even if not a new high score
+                                if (!userData.combinedHighScore) {
+                                    updateData.combinedHighScore = combinedScore;
+                                }
+                            }
+                        }
+                        
+                        console.log("Updating user document with:", updateData);
+                        transaction.set(userDocRef, updateData, { merge: true });
+                        return shooterScore > currentShooterHighScore;
+                    });
+                })
+                .then((isNewHighScore) => {
+                    console.log("Shooter score saved successfully. New high score:", isNewHighScore);
+                    return isNewHighScore;
+                })
+                .catch((error) => {
+                    console.error("Transaction failed: ", error);
+                    return false;
+                });
+            }
+
+            // Show login prompt if user is not logged in
+            function showLoginPrompt() {
+                const loginPrompt = document.createElement('div');
+                loginPrompt.className = 'login-prompt';
+                loginPrompt.innerHTML = `
+                    <div class="login-message">
+                        <h3>Login Required</h3>
+                        <p>Please login to save your score</p>
+                        <div class="login-form">
+                            <input type="email" id="login-email" placeholder="Enter your email" />
+                            <button id="login-button">Login</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(loginPrompt);
+                
+                // Add event listener for login button
+                document.getElementById('login-button').addEventListener('click', () => {
+                    const email = document.getElementById('login-email').value;
+                    if (email && email.includes('@')) {
+                        localStorage.setItem('userEmail', email);
+                        loginPrompt.remove();
+                        saveShooterScoreToFirestore().then(() => {
+                            // Show game over screen after saving
+                            gameOverScreen.style.display = 'block';
+                        });
+                    } else {
+                        alert('Please enter a valid email address');
+                    }
+                });
+            }
+
+            // Fetch leaderboard scores for shooter game
+            async function fetchShooterLeaderboardScores() {
+                try {
+                    // Get top 10 scores
+                    const scoresRef = db.collection('users');
+                    const snapshot = await scoresRef.orderBy('shooterHighScore', 'desc').limit(10).get();
+                    
+                    let tableHTML = `
+                        <table class="leaderboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Player</th>
+                                    <th>High Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    let rank = 1;
+                    let hasScores = false;
+                    
+                    snapshot.forEach(doc => {
+                        const userData = doc.data();
+                        if (userData.shooterHighScore) {
+                            hasScores = true;
+                            tableHTML += `
+                                <tr>
+                                    <td>${rank}</td>
+                                    <td>${userData.displayName || doc.id.split('@')[0]}</td>
+                                    <td>${userData.shooterHighScore || 0}</td>
+                                </tr>
+                            `;
+                            rank++;
+                        }
+                    });
+                    
+                    tableHTML += `</tbody></table>`;
+                    
+                    // If no scores found
+                    if (!hasScores) {
+                        document.getElementById('shooter-leaderboard-content').innerHTML = 'No scores found yet!';
+                    } else {
+                        document.getElementById('shooter-leaderboard-content').innerHTML = tableHTML;
+                    }
+                } catch (error) {
+                    console.error("Error fetching shooter leaderboard:", error);
+                    document.getElementById('shooter-leaderboard-content').innerHTML = 'Error loading leaderboard.';
+                }
+            }
+
+            // Function to show shooter game leaderboard
+            function showShooterLeaderboard() {
+                // Create a leaderboard container if it doesn't exist
+                let leaderboardContainer = document.getElementById('shooter-leaderboard-container');
+                
+                if (!leaderboardContainer) {
+                    leaderboardContainer = document.createElement('div');
+                    leaderboardContainer.id = 'shooter-leaderboard-container';
+                    leaderboardContainer.className = 'leaderboard-container';
+                    
+                    // Add a close button
+                    const closeButton = document.createElement('button');
+                    closeButton.innerHTML = 'X';
+                    closeButton.className = 'leaderboard-close-btn';
+                    closeButton.onclick = () => {
+                        leaderboardContainer.style.display = 'none';
+                    };
+                    
+                    // Create leaderboard content
+                    const content = document.createElement('div');
+                    content.innerHTML = '<h2>Shooter Leaderboard</h2><div id="shooter-leaderboard-content">Loading scores...</div>';
+                    
+                    // Add elements to container
+                    leaderboardContainer.appendChild(closeButton);
+                    leaderboardContainer.appendChild(content);
+                    
+                    // Add to body
+                    document.body.appendChild(leaderboardContainer);
+                } else {
+                    leaderboardContainer.style.display = 'block';
+                }
+                
+                // Fetch scores from Firestore
+                fetchShooterLeaderboardScores();
+            }
+
             // End the game
             function endGame() {
                 gameActive = false;
                 clearInterval(gameInterval);
                 clearInterval(bananaInterval);
                 
-                // Show game over screen
-                gameOverScreen.style.display = 'block';
+                // Save score to Firestore
+                saveShooterScoreToFirestore()
+                    .then((isNewHighScore) => {
+                        // Show appropriate message in game over screen
+                        if (isNewHighScore) {
+                            let newHighScoreMessage = document.querySelector('.high-score-message');
+                            if (!newHighScoreMessage) {
+                                newHighScoreMessage = document.createElement('div');
+                                newHighScoreMessage.className = 'high-score-message';
+                                newHighScoreMessage.textContent = '🎉 New High Score! 🎉';
+                                gameOverScreen.insertBefore(newHighScoreMessage, finalScoreDisplay);
+                            }
+                        }
+                        
+                        // Show game over screen
+                        gameOverScreen.style.display = 'block';
+                        
+                        // Add a leaderboard button to the game over screen if it doesn't exist
+                        if (!document.querySelector('.leaderboard-btn')) {
+                            const leaderboardButton = document.createElement('button');
+                            leaderboardButton.textContent = 'View Leaderboard';
+                            leaderboardButton.className = 'leaderboard-btn';
+                            leaderboardButton.onclick = showShooterLeaderboard;
+                            
+                            // Add it after the play again button
+                            if (playAgainButton.nextSibling) {
+                                gameOverScreen.insertBefore(leaderboardButton, playAgainButton.nextSibling);
+                            } else {
+                                gameOverScreen.appendChild(leaderboardButton);
+                            }
+                        }
+
+                        // Add Back to Main Menu button if it doesn't exist
+                        if (!document.querySelector('.main-menu-btn')) {
+                            const mainMenuButton = document.createElement('button');
+                            mainMenuButton.textContent = 'Back to Main Menu';
+                            mainMenuButton.className = 'main-menu-btn';
+                            mainMenuButton.onclick = function() {
+                            window.location.href = 'menu.html';
+                        };
+    
+                         // Add it after the leaderboard button or play again button
+                        gameOverScreen.appendChild(mainMenuButton);
+                        }
+
+                    });
             }
-            
-            // Event Listeners
-            gameContainer.addEventListener('click', createBullet);
-            playAgainButton.addEventListener('click', initGame);
-            backButton.addEventListener('click', () => {
-                // Navigate to game.html when back button is clicked
-                window.location.href = 'game.html';
-            });
             
             // Start the game
             initGame();
