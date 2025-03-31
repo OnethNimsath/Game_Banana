@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banana Shooter Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #fffacd;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #ffd700;
+            border: 2px solid #8b4513;
+            border-radius: 20px;
+            cursor: pointer;
+            z-index: 100;
+            font-weight: bold;
+        }
+
+        #time-display {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #98fb98;
+            border: 2px solid #2e8b57;
+            border-radius: 20px;
+            z-index: 100;
+            font-weight: bold;
+        }
+
+        #score-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #87cefa;
+            border: 2px solid #4169e1;
+            border-radius: 20px;
+            z-index: 100;
+            font-weight: bold;
+        }
+
+        .banana {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M20,80 Q0,50 30,20 Q60,10 80,40 Q90,70 70,80 Q50,90 20,80 Z" fill="%23ffeb3b" stroke="%23f57f17" stroke-width="2"/></svg>');
+            background-size: cover;
+            z-index: 1;
+        }
+
+        .bullet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ff6347;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        #gun {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 50px;
+            background-color: #4a90e2;
+            border-radius: 10px 10px 0 0;
+            z-index: 3;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #2c3e50;
+        }
+
+        #gun-barrel {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 60px;
+            background: linear-gradient(to bottom, #4a90e2, #2c3e50);
+            border-radius: 15px 15px 0 0;
+            z-index: 3;
+            border: 2px solid #2c3e50;
+            border-bottom: none;
+            box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #gun:after {
+            content: "";
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 15px;
+            background-color: #f5a623;
+            border-radius: 5px;
+            border: 2px solid #2c3e50;
+        }
+
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 200;
+            display: none;
+        }
+
+        #game-over h2 {
+            color: #ff6347;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        #final-score {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+
+        #play-again {
+            padding: 10px 20px;
+            background-color: #ffd700;
+            border: 2px solid #8b4513;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="back-button">← Back</div>
+        <div id="time-display">Time: 30</div>
+        <div id="score-display">Score: 0</div>
+        <div id="gun"></div>
+        <div id="gun-barrel"></div>
+        
+        <div id="game-over">
+            <h2>Time's Up!</h2>
+            <div id="final-score">Your score: 0</div>
+            <button id="play-again">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game variables
+            let score = 0;
+            let timeLeft = 30;
+            let gameInterval;
+            let bananaInterval;
+            let gameActive = true;
+            
+            // DOM elements
+            const gameContainer = document.getElementById('game-container');
+            const timeDisplay = document.getElementById('time-display');
+            const scoreDisplay = document.getElementById('score-display');
+            const backButton = document.getElementById('back-button');
+            const gameOverScreen = document.getElementById('game-over');
+            const finalScoreDisplay = document.getElementById('final-score');
+            const playAgainButton = document.getElementById('play-again');
+            
+            // Game initialization
+            function initGame() {
+                score = 0;
+                timeLeft = 30;
+                gameActive = true;
+                
+                // Update displays
+                updateScore();
+                updateTime();
+                
+                // Clear any existing bananas and bullets
+                document.querySelectorAll('.banana').forEach(b => b.remove());
+                document.querySelectorAll('.bullet').forEach(b => b.remove());
+                
+                // Hide game over screen
+                gameOverScreen.style.display = 'none';
+                
+                // Start game timers
+                gameInterval = setInterval(updateGameTime, 1000);
+                bananaInterval = setInterval(createBanana, 1000);
+            }
+            
+            // Create a new banana
+            function createBanana() {
+                if (!gameActive) return;
+                
+                const banana = document.createElement('div');
+                banana.className = 'banana';
+                
+                // Random position along the top
+                const randomX = Math.random() * (gameContainer.clientWidth - 50);
+                banana.style.left = `${randomX}px`;
+                banana.style.top = '0px';
+                
+                gameContainer.appendChild(banana);
+                
+                // Animate banana falling
+                let posY = 0;
+                const speed = 2 + Math.random() * 3; // Random speed
+                
+                const bananaFall = setInterval(() => {
+                    if (!gameActive) {
+                        clearInterval(bananaFall);
+                        return;
+                    }
+                    
+                    posY += speed;
+                    banana.style.top = `${posY}px`;
+                    
+                    // Remove banana if it goes off screen
+                    if (posY > gameContainer.clientHeight) {
+                        clearInterval(bananaFall);
+                        banana.remove();
+                    }
+                }, 20);
+            }
+            
+            // Create a bullet when clicking
+            function createBullet(e) {
+                if (!gameActive) return;
+                
+                const bullet = document.createElement('div');
+                bullet.className = 'bullet';
+                
+                // Start position (from gun barrel)
+                const gunBarrel = document.getElementById('gun-barrel');
+                const gunRect = gunBarrel.getBoundingClientRect();
+                const startX = gunRect.left + gunRect.width / 2 - 5;
+                const startY = gunRect.top;
+                
+                bullet.style.left = `${startX}px`;
+                bullet.style.top = `${startY}px`;
+                
+                gameContainer.appendChild(bullet);
+                
+                // Calculate bullet direction (towards click position)
+                const targetX = e.clientX;
+                const targetY = e.clientY;
+                
+                const angle = Math.atan2(targetY - startY, targetX - startX);
+                const speed = 10;
+                const velocityX = Math.cos(angle) * speed;
+                const velocityY = Math.sin(angle) * speed;
+                
+                // Animate bullet movement
+                let posX = startX;
+                let posY = startY;
+                
+                const bulletMove = setInterval(() => {
+                    if (!gameActive) {
+                        clearInterval(bulletMove);
+                        bullet.remove();
+                        return;
+                    }
+                    
+                    posX += velocityX;
+                    posY += velocityY;
+                    
+                    bullet.style.left = `${posX}px`;
+                    bullet.style.top = `${posY}px`;
+                    
+                    // Check collision with bananas
+                    document.querySelectorAll('.banana').forEach(banana => {
+                        const bananaRect = banana.getBoundingClientRect();
+                        const bulletRect = bullet.getBoundingClientRect();
+                        
+                        if (
+                            bulletRect.left < bananaRect.right &&
+                            bulletRect.right > bananaRect.left &&
+                            bulletRect.top < bananaRect.bottom &&
+                            bulletRect.bottom > bananaRect.top
+                        ) {
+                            // Collision detected
+                            banana.remove();
+                            bullet.remove();
+                            clearInterval(bulletMove);
+                            
+                            // Increase score
+                            score += 10;
+                            updateScore();
+                            
+                            // Create explosion effect
+                            createExplosion(bananaRect.left + bananaRect.width / 2, bananaRect.top + bananaRect.height / 2);
+                        }
+                    });
+                    
+                    // Remove bullet if it goes off screen
+                    if (
+                        posX < 0 ||
+                        posX > gameContainer.clientWidth ||
+                        posY < 0 ||
+                        posY > gameContainer.clientHeight
+                    ) {
+                        clearInterval(bulletMove);
+                        bullet.remove();
+                    }
+                }, 10);
+            }
+            
+            // Create explosion effect
+            function createExplosion(x, y) {
+                const explosion = document.createElement('div');
+                explosion.style.position = 'absolute';
+                explosion.style.left = `${x - 25}px`;
+                explosion.style.top = `${y - 25}px`;
+                explosion.style.width = '50px';
+                explosion.style.height = '50px';
+                explosion.style.borderRadius = '50%';
+                explosion.style.backgroundColor = 'rgba(255, 255, 0, 0.7)';
+                explosion.style.zIndex = '4';
+                
+                gameContainer.appendChild(explosion);
+                
+                // Animate explosion
+                let size = 1;
+                let opacity = 0.7;
+                
+                const explosionInterval = setInterval(() => {
+                    size *= 1.1;
+                    opacity -= 0.05;
+                    
+                    explosion.style.width = `${50 * size}px`;
+                    explosion.style.height = `${50 * size}px`;
+                    explosion.style.left = `${x - 25 * size}px`;
+                    explosion.style.top = `${y - 25 * size}px`;
+                    explosion.style.backgroundColor = `rgba(255, 255, 0, ${opacity})`;
+                    
+                    if (opacity <= 0) {
+                        clearInterval(explosionInterval);
+                        explosion.remove();
+                    }
+                }, 30);
+            }
+            
+            // Update score display
+            function updateScore() {
+                scoreDisplay.textContent = `Score: ${score}`;
+                finalScoreDisplay.textContent = `Your score: ${score}`;
+            }
+            
+            // Update time display
+            function updateTime() {
+                timeDisplay.textContent = `Time: ${timeLeft}`;
+            }
+            
+            // Update game time
+            function updateGameTime() {
+                timeLeft--;
+                updateTime();
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }
+            
+            // End the game
+            function endGame() {
+                gameActive = false;
+                clearInterval(gameInterval);
+                clearInterval(bananaInterval);
+                
+                // Show game over screen
+                gameOverScreen.style.display = 'block';
+            }
+            
+            // Event Listeners
+            gameContainer.addEventListener('click', createBullet);
+            playAgainButton.addEventListener('click', initGame);
+            backButton.addEventListener('click', () => {
+                // Navigate to game.html when back button is clicked
+                window.location.href = 'game.html';
+            });
+            
+            // Start the game
+            initGame();
+        });
+    </script>
+</body>
+</html>
