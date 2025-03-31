@@ -55,7 +55,7 @@
       <span class="banana-icon">🍌</span> Play Game
     </button>
     
-    <button class="button leaderboard-btn">
+    <button class="button leaderboard-btn" id="board">
       <span class="banana-icon">🍌</span> Leaderboard
     </button>
 
@@ -76,6 +76,10 @@
           window.location.href = "login.html";
       });
 
+      document.getElementById("board").addEventListener("click", function() {
+          window.location.href = "leaderboard.html";
+      });
+
       document.getElementById("playerAccount").addEventListener("click", function() {
           window.location.href = "profile.html";
       }); 
@@ -83,6 +87,8 @@
       document.getElementById("playGame").addEventListener("click", function() {
           window.location.href = "game_difficulty.html";
       });
+
+
   </script>
   </div>
 </body>
