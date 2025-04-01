@@ -1,98 +1,146 @@
-// Page navigation
-document.getElementById("exitGame").addEventListener("click", function() {
-    window.location.href = "login.html";
-});
-
-document.getElementById("board").addEventListener("click", function() {
-    window.location.href = "leaderboard.html";
-});
-
-document.getElementById("setting").addEventListener("click", function() {
-    window.location.href = "settings.html";
-});
-
-document.getElementById("playerAccount").addEventListener("click", function() {
-    window.location.href = "profile.html";
-}); 
-
-document.getElementById("playGame").addEventListener("click", function() {
-    window.location.href = "game_difficulty.html";
-});
-
-// Create floating monkey animations
-function createMonkeys() {
-  for (let i = 0; i < 10; i++) {
-    const monkey = document.createElement('div');
-    monkey.className = 'monkey';
-    monkey.style.left = Math.random() * 100 + 'vw';
-    monkey.style.top = Math.random() * 100 + 'vh';
-    monkey.style.animationDelay = Math.random() * 5 + 's';
-    document.body.appendChild(monkey);
+// Cookie management functions
+function setCookie(name, value, days) {
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + days);
+    
+    const cookieValue = encodeURIComponent(value) + 
+                       ((days) ? '; expires=' + expiryDate.toUTCString() : '') + 
+                       '; path=/';
+    
+    document.cookie = name + '=' + cookieValue;
   }
   
-  // Initialize audio after creating elements
-  initializeAudio();
-}
-// Initialize audio functionality
-function initializeAudio() {
-  const audioControl = document.getElementById('audioControl');
-  const audioIcon = document.getElementById('audioIcon');
-  const soundWave1 = document.getElementById('soundWave1');
-  const soundWave2 = document.getElementById('soundWave2');
-  const muteSlash = document.getElementById('muteSlash');
-  const backgroundMusic = document.getElementById('backgroundMusic');
+  function getCookie(name) {
+    const nameEQ = name + '=';
+    const cookies = document.cookie.split(';');
+    
+    for (let i = 0; i < cookies.length; i++) {
+      let cookie = cookies[i];
+      while (cookie.charAt(0) === ' ') {
+        cookie = cookie.substring(1, cookie.length);
+      }
+      
+      if (cookie.indexOf(nameEQ) === 0) {
+        return decodeURIComponent(cookie.substring(nameEQ.length, cookie.length));
+      }
+    }
+    
+    return null;
+  }
   
-  // Set initial state to muted
-  backgroundMusic.muted = true;
-  backgroundMusic.load(); // Make sure the audio is loaded and ready
+  // Page navigation
+  document.getElementById("exitGame").addEventListener("click", function() {
+      window.location.href = "login.html";
+  });
+
+  document.getElementById("board").addEventListener("click", function() {
+      window.location.href = "leaderboard.html";
+  });
+
+  document.getElementById("setting").addEventListener("click", function() {
+      window.location.href = "settings.html";
+  });
+
+  document.getElementById("playerAccount").addEventListener("click", function() {
+      window.location.href = "profile.html";
+  }); 
+
+  document.getElementById("playGame").addEventListener("click", function() {
+      window.location.href = "game_difficulty.html";
+  });
   
-  // Toggle audio function
-  function toggleAudio() {
-    if (backgroundMusic.muted) {
-      // Unmute
-      backgroundMusic.muted = false;
-      backgroundMusic.play().catch(error => {
-        console.log("Audio play prevented until user interacts with page");
-      });
+  // Create floating monkey animations
+  function createMonkeys() {
+    for (let i = 0; i < 10; i++) {
+      const monkey = document.createElement('div');
+      monkey.className = 'monkey';
+      monkey.style.left = Math.random() * 100 + 'vw';
+      monkey.style.top = Math.random() * 100 + 'vh';
+      monkey.style.animationDelay = Math.random() * 5 + 's';
+      document.body.appendChild(monkey);
+    }
+    
+    // Initialize audio after creating elements
+    initializeAudio();
+  }
+  
+  // Initialize audio functionality
+  function initializeAudio() {
+    const audioControl = document.getElementById('audioControl');
+    const audioIcon = document.getElementById('audioIcon');
+    const soundWave1 = document.getElementById('soundWave1');
+    const soundWave2 = document.getElementById('soundWave2');
+    const muteSlash = document.getElementById('muteSlash');
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    
+    // Set initial state to muted by default
+    backgroundMusic.muted = true;
+    backgroundMusic.load(); // Make sure the audio is loaded and ready
+    
+    // Check if we have a saved audio preference in cookies
+    const audioMuted = getCookie('bananaquestAudioMuted');
+    
+    // If there's a saved preference and it's 'false', we should unmute
+    if (audioMuted === 'false') {
+      // Visual update for unmuted state
       soundWave1.style.display = 'block';
       soundWave2.style.display = 'block';
       muteSlash.style.display = 'none';
-      localStorage.setItem('bananaquestAudioMuted', 'false');
-    } else {
-      // Mute
-      backgroundMusic.muted = true;
-      soundWave1.style.display = 'none';
-      soundWave2.style.display = 'none';
-      muteSlash.style.display = 'block';
-      localStorage.setItem('bananaquestAudioMuted', 'true');
-    }
-  }
-  
-  // Add click event to toggle audio
-  audioControl.addEventListener('click', toggleAudio);
-  
-  // Implement cross-page audio persistence
-  // Check if we should restore audio from previous session
-  if (localStorage.getItem('bananaquestAudioMuted') === 'false') {
-    // Try to restore unmuted state, but we still need user interaction to play
-    soundWave1.style.display = 'block';
-    soundWave2.style.display = 'block';
-    muteSlash.style.display = 'none';
-    
-    // We'll need a user interaction to actually play the sound
-    document.addEventListener('click', function audioPlayHandler() {
-      if (!backgroundMusic.muted) {
-        backgroundMusic.muted = false;
-        backgroundMusic.play().then(() => {
-          // Successfully playing
-          document.removeEventListener('click', audioPlayHandler);
-        }).catch(error => {
-          // Still can't play, will try again on next click
+      backgroundMusic.muted = false;
+      
+      // Try to play audio (might need user interaction first)
+      const playPromise = backgroundMusic.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          // Browser prevented autoplay, will need user interaction
+          console.log("Audio autoplay prevented by browser, needs user interaction");
+          
+          // Set up a one-time click listener for the whole document
+          document.addEventListener('click', function initialPlayHandler() {
+            if (!backgroundMusic.muted) {
+              backgroundMusic.play().then(() => {
+                // Successfully started playing
+                document.removeEventListener('click', initialPlayHandler);
+              }).catch(e => {
+                // Still couldn't play for some reason
+                console.error("Still couldn't play audio after user interaction:", e);
+              });
+            }
+          }, { once: false });
         });
       }
-    });
+    }
+    
+    // Toggle audio function
+    function toggleAudio() {
+      if (backgroundMusic.muted) {
+        // Unmute
+        backgroundMusic.muted = false;
+        backgroundMusic.play().catch(error => {
+          console.log("Audio play prevented until user interacts with page");
+        });
+        soundWave1.style.display = 'block';
+        soundWave2.style.display = 'block';
+        muteSlash.style.display = 'none';
+        
+        // Save preference to cookie (unmuted = false)
+        setCookie('bananaquestAudioMuted', 'false', 30); // Expires in 30 days
+      } else {
+        // Mute
+        backgroundMusic.muted = true;
+        soundWave1.style.display = 'none';
+        soundWave2.style.display = 'none';
+        muteSlash.style.display = 'block';
+        
+        // Save preference to cookie (muted = true)
+        setCookie('bananaquestAudioMuted', 'true', 30); // Expires in 30 days
+      }
+    }
+    
+    // Add click event to toggle audio
+    audioControl.addEventListener('click', toggleAudio);
   }
-}
-
-// Call the function when the page loads
-window.onload = createMonkeys;
+  
+  // Call the function when the page loads
+  window.onload = createMonkeys;
