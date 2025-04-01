@@ -42,19 +42,6 @@
             <button class="difficulty-btn back-btn" onclick="goBack()">Back to Menu</button>
         </div>
     </div>
-    
-    <script>
-        function startGame(difficulty) {
-            // Store the selected difficulty in localStorage
-            localStorage.setItem('gameDifficulty', difficulty);
-            // Redirect to the game page
-            window.location.href = 'game.html';
-        }
-        
-        function goBack() {
-            // Go back to the main menu
-            window.location.href = 'menu.html';
-        }
-    </script>
+    <script src="game_difficulty.js"></script>
 </body>
 </html>

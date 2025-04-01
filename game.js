@@ -526,5 +526,6 @@ function showLeaderboard() {
     fetchLeaderboardScores();
 }
 
+
 // Start the game with difficulty settings
 initializeGame();
