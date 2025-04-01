@@ -378,6 +378,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
 
 </head>
 <body>
@@ -413,6 +414,23 @@
             const gameOverScreen = document.getElementById('game-over');
             const finalScoreDisplay = document.getElementById('final-score');
             const playAgainButton = document.getElementById('play-again');
+            
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyDkN-xlEdgk5W7RQJwH8LGV-eOmN7LNF8Y",
+                authDomain: "smart-banana-97744.firebaseapp.com",
+                projectId: "smart-banana-97744",
+                storageBucket: "smart-banana-97744.firebasestorage.app",
+                messagingSenderId: "225178137471",
+                appId: "1:225178137471:web:02a4135eb6347bd7c5204a"
+            };
+
+            // Initialize Firebase
+            if (!firebase.apps || !firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const db = firebase.firestore();
+            const auth = firebase.auth();
             
             // Game initialization
             function initGame() {
@@ -647,43 +665,19 @@
                 }
             }
             
-            // Event Listeners
-            gameContainer.addEventListener('click', createBullet);
-            playAgainButton.addEventListener('click', initGame);
-            backButton.addEventListener('click', () => {
-                // Navigate back to the main game page
-                window.location.href = 'game.html';
-            });
-
-            // Firebase configuration - make sure this matches your puzzle game's configuration
-            const firebaseConfig = {
-                apiKey: "AIzaSyDkN-xlEdgk5W7RQJwH8LGV-eOmN7LNF8Y",
-                authDomain: "smart-banana-97744.firebaseapp.com",
-                projectId: "smart-banana-97744",
-                storageBucket: "smart-banana-97744.firebasestorage.app",
-                messagingSenderId: "225178137471",
-                appId: "1:225178137471:web:02a4135eb6347bd7c5204a"
-            };
-
-            // Initialize Firebase
-            if (!firebase.apps || !firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            const db = firebase.firestore();
-
             // Save shooter score to Firestore
             function saveShooterScoreToFirestore() {
-                // Get current user email from localStorage
-                const userEmail = localStorage.getItem('userEmail');
+                // Get current user UID from Firebase Auth
+                const currentUser = auth.currentUser;
                 
-                if (!userEmail) {
-                    console.error("No user email found. Cannot save shooter score.");
+                if (!currentUser || !currentUser.uid) {
+                    console.error("No authenticated user found. Cannot save shooter score.");
                     showLoginPrompt();
                     return Promise.resolve(false);
                 }
 
-                console.log("Saving score for user:", userEmail);
-                const userDocRef = db.collection('users').doc(userEmail);
+                console.log("Saving score for user:", currentUser.displayName || currentUser.email);
+                const userDocRef = db.collection('users').doc(currentUser.uid);
                 
                 return db.runTransaction((transaction) => {
                     return transaction.get(userDocRef).then((userDoc) => {
@@ -693,65 +687,39 @@
                         if (userDoc.exists) {
                             userData = userDoc.data();
                             console.log("Existing user data:", userData);
+                            
+                            // Only update if the new score is higher than the existing high score
+                            if (!userData.shooterHighScore || shooterScore > userData.shooterHighScore) {
+                                transaction.update(userDocRef, {
+                                    shooterHighScore: shooterScore,
+                                    gamesPlayed: (userData.gamesPlayed || 0) + 1,
+                                    bananasCollected: (userData.bananasCollected || 0)
+                                });
+                                console.log("Updated high score to:", shooterScore);
+                                return true; // New high score
+                            } else {
+                                // Still increment games played even if high score isn't beaten
+                                transaction.update(userDocRef, {
+                                    gamesPlayed: (userData.gamesPlayed || 0) + 1
+                                });
+                                console.log("Score not higher than existing high score");
+                                return false; // Not a new high score
+                            }
                         } else {
                             console.log("No existing user data found, creating new document");
+                            // This shouldn't typically happen, but handling just in case
+                            transaction.set(userDocRef, {
+                                displayName: currentUser.displayName || "Player",
+                                email: currentUser.email,
+                                shooterHighScore: shooterScore,
+                                gamesPlayed: 1,
+                                bananasCollected: 0
+                            });
+                            return true; // New record by default
                         }
-                        
-                        // Check if shooter high score exists
-                        const currentShooterHighScore = userData.shooterHighScore || 0;
-                        
-                        // Create update data object with all fields we want to ensure exist
-                        const updateData = {
-                            shooterScore: shooterScore,
-                            lastPlayedShooter: firebase.firestore.Timestamp.now()
-                        };
-                        
-                        // Update shooter high score if current score is higher
-                        if (shooterScore > currentShooterHighScore) {
-                            updateData.shooterHighScore = shooterScore;
-                        } else {
-                            // Ensure field exists even if not a new high score
-                            if (!userData.shooterHighScore) {
-                                updateData.shooterHighScore = shooterScore;
-                            }
-                        }
-                        
-                        // Ensure displayName field exists
-                        if (!userData.displayName) {
-                            // Extract username from email if no display name
-                            const username = userEmail.split('@')[0];
-                            updateData.displayName = username;
-                        }
-                        
-                        // Save combined score (puzzle + shooter) if we have both scores
-                        if (userData.score) {
-                            const puzzleScore = userData.score || 0;
-                            const combinedScore = puzzleScore + shooterScore;
-                            updateData.combinedScore = combinedScore;
-                            
-                            // Update combined high score if needed
-                            const currentCombinedHighScore = userData.combinedHighScore || 0;
-                            if (combinedScore > currentCombinedHighScore) {
-                                updateData.combinedHighScore = combinedScore;
-                            } else {
-                                // Ensure field exists even if not a new high score
-                                if (!userData.combinedHighScore) {
-                                    updateData.combinedHighScore = combinedScore;
-                                }
-                            }
-                        }
-                        
-                        console.log("Updating user document with:", updateData);
-                        transaction.set(userDocRef, updateData, { merge: true });
-                        return shooterScore > currentShooterHighScore;
                     });
-                })
-                .then((isNewHighScore) => {
-                    console.log("Shooter score saved successfully. New high score:", isNewHighScore);
-                    return isNewHighScore;
-                })
-                .catch((error) => {
-                    console.error("Transaction failed: ", error);
+                }).catch(error => {
+                    console.error("Error saving score:", error);
                     return false;
                 });
             }
@@ -776,12 +744,38 @@
                 document.getElementById('login-button').addEventListener('click', () => {
                     const email = document.getElementById('login-email').value;
                     if (email && email.includes('@')) {
-                        localStorage.setItem('userEmail', email);
-                        loginPrompt.remove();
-                        saveShooterScoreToFirestore().then(() => {
-                            // Show game over screen after saving
-                            gameOverScreen.style.display = 'block';
-                        });
+                        // Sign in anonymously but store the email for later reference
+                        auth.signInAnonymously()
+                            .then((userCredential) => {
+                                // Store email in localStorage for reference
+                                localStorage.setItem('userEmail', email);
+                                
+                                // Update the user profile with a display name derived from email
+                                const user = userCredential.user;
+                                const displayName = email.split('@')[0];
+                                
+                                // Create user document in Firestore
+                                db.collection('users').doc(user.uid).set({
+                                    displayName: displayName,
+                                    email: email,
+                                    shooterHighScore: score,
+                                    gamesPlayed: 1,
+                                    bananasCollected: 0
+                                }).then(() => {
+                                    console.log("User document created successfully");
+                                    loginPrompt.remove();
+                                    
+                                    // Show game over screen after saving
+                                    gameOverScreen.style.display = 'block';
+                                }).catch(error => {
+                                    console.error("Error creating user document:", error);
+                                    alert("Error saving your score. Please try again.");
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error signing in anonymously:", error);
+                                alert("Error signing in. Please try again.");
+                            });
                     } else {
                         alert('Please enter a valid email address');
                     }
@@ -817,7 +811,7 @@
                             tableHTML += `
                                 <tr>
                                     <td>${rank}</td>
-                                    <td>${userData.displayName || doc.id.split('@')[0]}</td>
+                                    <td>${userData.displayName || "Player"}</td>
                                     <td>${userData.shooterHighScore || 0}</td>
                                 </tr>
                             `;
@@ -881,53 +875,132 @@
                 clearInterval(gameInterval);
                 clearInterval(bananaInterval);
                 
-                // Save score to Firestore
-                saveShooterScoreToFirestore()
-                    .then((isNewHighScore) => {
-                        // Show appropriate message in game over screen
-                        if (isNewHighScore) {
-                            let newHighScoreMessage = document.querySelector('.high-score-message');
-                            if (!newHighScoreMessage) {
-                                newHighScoreMessage = document.createElement('div');
-                                newHighScoreMessage.className = 'high-score-message';
-                                newHighScoreMessage.textContent = '🎉 New High Score! 🎉';
-                                gameOverScreen.insertBefore(newHighScoreMessage, finalScoreDisplay);
+                // Check if user is already authenticated
+                if (auth.currentUser) {
+                    // Save score to Firestore
+                    saveShooterScoreToFirestore()
+                        .then((isNewHighScore) => {
+                            // Show appropriate message in game over screen
+                            if (isNewHighScore) {
+                                let newHighScoreMessage = document.querySelector('.high-score-message');
+                                if (!newHighScoreMessage) {
+                                    newHighScoreMessage = document.createElement('div');
+                                    newHighScoreMessage.className = 'high-score-message';
+                                    newHighScoreMessage.textContent = '🎉 New High Score! 🎉';
+                                    gameOverScreen.insertBefore(newHighScoreMessage, finalScoreDisplay);
+                                }
                             }
-                        }
-                        
-                        // Show game over screen
-                        gameOverScreen.style.display = 'block';
-                        
-                        // Add a leaderboard button to the game over screen if it doesn't exist
-                        if (!document.querySelector('.leaderboard-btn')) {
-                            const leaderboardButton = document.createElement('button');
-                            leaderboardButton.textContent = 'View Leaderboard';
-                            leaderboardButton.className = 'leaderboard-btn';
-                            leaderboardButton.onclick = showShooterLeaderboard;
                             
-                            // Add it after the play again button
-                            if (playAgainButton.nextSibling) {
-                                gameOverScreen.insertBefore(leaderboardButton, playAgainButton.nextSibling);
-                            } else {
-                                gameOverScreen.appendChild(leaderboardButton);
+                            // Show game over screen
+                            gameOverScreen.style.display = 'block';
+                            
+                            // Add a leaderboard button to the game over screen if it doesn't exist
+                            if (!document.querySelector('.leaderboard-btn')) {
+                                const leaderboardButton = document.createElement('button');
+                                leaderboardButton.textContent = 'View Leaderboard';
+                                leaderboardButton.className = 'leaderboard-btn';
+                                leaderboardButton.onclick = showShooterLeaderboard;
+                                
+                                // Add it after the play again button
+                                if (playAgainButton.nextSibling) {
+                                    gameOverScreen.insertBefore(leaderboardButton, playAgainButton.nextSibling);
+                                } else {
+                                    gameOverScreen.appendChild(leaderboardButton);
+                                }
                             }
-                        }
 
-                        // Add Back to Main Menu button if it doesn't exist
-                        if (!document.querySelector('.main-menu-btn')) {
-                            const mainMenuButton = document.createElement('button');
-                            mainMenuButton.textContent = 'Back to Main Menu';
-                            mainMenuButton.className = 'main-menu-btn';
-                            mainMenuButton.onclick = function() {
-                            window.location.href = 'menu.html';
-                        };
-    
-                         // Add it after the leaderboard button or play again button
-                        gameOverScreen.appendChild(mainMenuButton);
-                        }
-
-                    });
+                            // Add Back to Main Menu button if it doesn't exist
+                            if (!document.querySelector('.main-menu-btn')) {
+                                const mainMenuButton = document.createElement('button');
+                                mainMenuButton.textContent = 'Back to Main Menu';
+                                mainMenuButton.className = 'main-menu-btn';
+                                mainMenuButton.onclick = function() {
+                                    window.location.href = 'menu.html';
+                                };
+                                
+                                // Add it after the leaderboard button or play again button
+                                gameOverScreen.appendChild(mainMenuButton);
+                            }
+                        });
+                } else {
+                    // Try to get the user from localStorage for backward compatibility
+                    const storedEmail = localStorage.getItem('userEmail');
+                    
+                    if (storedEmail) {
+                        // Sign in anonymously but associate with the stored email
+                        auth.signInAnonymously()
+                            .then((userCredential) => {
+                                const user = userCredential.user;
+                                const displayName = storedEmail.split('@')[0];
+                                
+                                // Create/update user document
+                                return db.collection('users').doc(user.uid).set({
+                                    displayName: displayName,
+                                    email: storedEmail,
+                                    shooterHighScore: score,
+                                    gamesPlayed: 1,
+                                    bananasCollected: 0
+                                }, { merge: true });
+                            })
+                            .then(() => {
+                                // Now that we've created the user, save the score
+                                return saveShooterScoreToFirestore();
+                            })
+                            .then((isNewHighScore) => {
+                                // Show high score message if appropriate
+                                if (isNewHighScore) {
+                                    let newHighScoreMessage = document.querySelector('.high-score-message');
+                                    if (!newHighScoreMessage) {
+                                        newHighScoreMessage = document.createElement('div');
+                                        newHighScoreMessage.className = 'high-score-message';
+                                        newHighScoreMessage.textContent = '🎉 New High Score! 🎉';
+                                        gameOverScreen.insertBefore(newHighScoreMessage, finalScoreDisplay);
+                                    }
+                                }
+                                
+                                // Show game over screen with buttons
+                                gameOverScreen.style.display = 'block';
+                                
+                                // Add leaderboard button
+                                if (!document.querySelector('.leaderboard-btn')) {
+                                    const leaderboardButton = document.createElement('button');
+                                    leaderboardButton.textContent = 'View Leaderboard';
+                                    leaderboardButton.className = 'leaderboard-btn';
+                                    leaderboardButton.onclick = showShooterLeaderboard;
+                                    
+                                    gameOverScreen.appendChild(leaderboardButton);
+                                }
+                                
+                                // Add back to menu button
+                                if (!document.querySelector('.main-menu-btn')) {
+                                    const mainMenuButton = document.createElement('button');
+                                    mainMenuButton.textContent = 'Back to Main Menu';
+                                    mainMenuButton.className = 'main-menu-btn';
+                                    mainMenuButton.onclick = function() {
+                                        window.location.href = 'menu.html';
+                                    };
+                                    
+                                    gameOverScreen.appendChild(mainMenuButton);
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Error during anonymous signin:", error);
+                                showLoginPrompt();
+                            });
+                    } else {
+                        // No stored email, show login prompt
+                        showLoginPrompt();
+                    }
+                }
             }
+            
+            // Event Listeners
+            gameContainer.addEventListener('click', createBullet);
+            playAgainButton.addEventListener('click', initGame);
+            backButton.addEventListener('click', () => {
+                // Navigate back to the main game page
+                window.location.href = 'game.html';
+            });
             
             // Start the game
             initGame();

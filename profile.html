@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="profile.css">
     <title>Banana Quest - User Account</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="container">
@@ -39,7 +35,7 @@
             <div class="stats-box">
                 <div class="stats-title">Player Stats</div>
                 <div class="stat-item">
-                    <div class="stat-name">Highest Score:</div>
+                    <div class="stat-name">Shooter High Score:</div>
                     <div id="highScore" class="stat-value">0</div>
                 </div>
                 <div class="stat-item">
@@ -57,6 +53,8 @@
             </a>
         </div>
     </div>
-    <script src="profile.js"></script>
+    
+    <!-- Load the new script as a module -->
+    <script type="module" src="profile.js"></script>
 </body>
 </html>
