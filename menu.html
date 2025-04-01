@@ -5,8 +5,22 @@
   <title>Banana Quest - Game Menu</title>
   <link rel="stylesheet" href="menu.css">
   <link rel="stylesheet" href="login.css">
-</head>
-<body>
+  <!-- Audio control button -->
+  <div class="audio-control" id="audioControl">
+    <svg class="audio-icon" id="audioIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Default muted icon -->
+      <path d="M4.5 9H7.5L12 4.5V19.5L7.5 15H4.5C3.67157 15 3 14.3284 3 13.5V10.5C3 9.67157 3.67157 9 4.5 9Z" fill="#555555"/>
+      <path id="soundWave1" style="display: none;" d="M14 8.5C15 9.5 15.5 11 15.5 12C15.5 13 15 14.5 14 15.5" stroke="#555555" stroke-width="1.5" stroke-linecap="round"/>
+      <path id="soundWave2" style="display: none;" d="M16.5 6C18.5 8 19.5 10 19.5 12C19.5 14 18.5 16 16.5 18" stroke="#555555" stroke-width="1.5" stroke-linecap="round"/>
+      <path id="muteSlash" d="M2 2L22 22" stroke="#FF5555" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <!-- Audio element with preview.mp3 -->
+  <audio id="backgroundMusic" loop>
+    <source src="preview.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
 
   <div class="background"></div>
 
@@ -31,23 +45,6 @@
     <div class="falling-banana"></div>
   </div>
   
-  <script>
-    // Create floating monkey animations
-    function createMonkeys() {
-      for (let i = 0; i < 10; i++) {
-        const monkey = document.createElement('div');
-        monkey.className = 'monkey';
-        monkey.style.left = Math.random() * 100 + 'vw';
-        monkey.style.top = Math.random() * 100 + 'vh';
-        monkey.style.animationDelay = Math.random() * 5 + 's';
-        document.body.appendChild(monkey);
-      }
-    }
-    
-    // Call the function when the page loads
-    window.onload = createMonkeys;
-  </script>
-  
   <div class="menu-container">
     <h1>Banana Quest</h1>
     
@@ -69,31 +66,8 @@
     
     <button class="button exit-btn" id="exitGame">
       <span class="banana-icon">🍌</span> Exit Game
-  </button>
-  
-  <script>
-      document.getElementById("exitGame").addEventListener("click", function() {
-          window.location.href = "login.html";
-      });
-
-      document.getElementById("board").addEventListener("click", function() {
-          window.location.href = "leaderboard.html";
-      });
-
-      document.getElementById("setting").addEventListener("click", function() {
-          window.location.href = "settings.html";
-      });
-
-      document.getElementById("playerAccount").addEventListener("click", function() {
-          window.location.href = "profile.html";
-      }); 
-
-      document.getElementById("playGame").addEventListener("click", function() {
-          window.location.href = "game_difficulty.html";
-      });
-
-
-  </script>
+    </button>
   </div>
+  <script type="module" src="menu.js"></script>
 </body>
 </html>

@@ -127,3 +127,30 @@ body {
   .button:hover .banana-icon {
     transform: rotate(10deg);
   }
+
+  .audio-control {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 215, 0, 0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .audio-control:hover {
+    transform: scale(1.1);
+    background-color: rgba(255, 215, 0, 0.9);
+  }
+
+  .audio-icon {
+    width: 24px;
+    height: 24px;
+  }
