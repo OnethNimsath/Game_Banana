@@ -98,10 +98,6 @@ document.getElementById("board").addEventListener("click", function() {
     window.location.href = "leaderboard.html";
 });
 
-document.getElementById("setting").addEventListener("click", function() {
-    window.location.href = "settings.html";
-});
-
 document.getElementById("playerAccount").addEventListener("click", function() {
     window.location.href = "profile.html";
 }); 
