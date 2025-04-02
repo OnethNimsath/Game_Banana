@@ -1,8 +1,7 @@
-
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"
-import { getFirestore, setDoc, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js"
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js"
+import { getFirestore, setDoc, doc, updateDoc, increment, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -89,7 +88,78 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
   });
+  
+  // Add Google Sign-in button event listener - Updated to match your HTML ID
+  const googleSignInButton = document.querySelector('button[id="googleSignUpBtn"]');
+  if (googleSignInButton) {
+    googleSignInButton.addEventListener('click', signInWithGoogle);
+  } else {
+    // Try finding the Google button by the class or the Sign up with Google button in a different way
+    const googleButton = document.querySelector('.google-signup-btn') || document.querySelector('button:contains("Sign up with Google")');
+    if (googleButton) {
+      googleButton.addEventListener('click', signInWithGoogle);
+    } else {
+      console.error("Google sign-up button not found");
+    }
+  }
 });
+
+// Function to handle Google sign-in
+function signInWithGoogle(event) {
+  // Prevent form submission
+  if (event) {
+    event.preventDefault();
+  }
+  
+  const auth = getAuth();
+  const provider = new GoogleAuthProvider();
+  const db = getFirestore();
+  
+  // Show a loading message
+  showMessage('Connecting to Google...', 'signUpMessage');
+  
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      // This gives you a Google Access Token
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const user = result.user;
+      
+      // Check if user document exists in Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      
+      return getDoc(userDocRef)
+        .then((docSnapshot) => {
+          if (!docSnapshot.exists()) {
+            // New user - create document in Firestore
+            const userData = {
+              email: user.email,
+              displayName: user.displayName || "Banana Player", // Fallback if no display name
+              bananasCollected: 0,
+              gamesPlayed: 0,
+              shooterHighScore: 0
+            };
+            
+            return setDoc(userDocRef, userData)
+              .then(() => {
+                showMessage('Account created with Google successfully!', 'signUpMessage');
+                setTimeout(() => {
+                  window.location.href = 'menu.html';
+                }, 2000);
+              });
+          } else {
+            // Existing user - redirect directly
+            showMessage('Signed in with Google successfully!', 'signUpMessage');
+            setTimeout(() => {
+              window.location.href = 'menu.html';
+            }, 2000);
+          }
+        });
+    })
+    .catch((error) => {
+      console.error("Google sign-in error:", error);
+      showMessage('Google sign-in failed: ' + error.message, 'signUpMessage');
+    });
+}
 
 // Function to update player score in Firestore
 // This function can be called from game.js when a player scores
