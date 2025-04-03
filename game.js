@@ -20,21 +20,18 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Function to navigate back to menu
 function goBack() {
     window.location.href = 'game_difficulty.html';
 }
 
-// Initialize game based on selected difficulty
 function initializeGame() {
-    // Reset score
     score = 0;
     updateScoreDisplay();
     
+    //https://stackoverflow.com/questions/64712803/change-game-difficulty-javascript used for reference
     // Get difficulty from localStorage
     difficulty = localStorage.getItem('gameDifficulty') || "medium";
     
-    // Set lives and time based on difficulty
     switch(difficulty) {
         case "easy":
             lives = 5;
@@ -52,8 +49,7 @@ function initializeGame() {
             lives = 3;
             timeLeft = 20;
     }
-    
-    // Add difficulty indicator to UI
+
     addDifficultyIndicator();
     
     // Create or update timer element
@@ -98,6 +94,9 @@ function updateScoreDisplay() {
     }
 }
 
+//https://stackoverflow.com/questions/60626853/saving-users-scores-and-favorites-in-firestore-database used for reference
+//https://feloy.medium.com/firebase-saving-scores-into-firestore-with-go-functions-b128fd8c425 used for reference
+
 // Save score to Firestore
 function saveScoreToFirestore() {
     const userEmail = localStorage.getItem('userEmail');
@@ -141,9 +140,9 @@ function saveScoreToFirestore() {
     });
 }
 
-// Add a visual indicator for the current difficulty
+
 function addDifficultyIndicator() {
-    // Remove existing indicator if present
+
     let existingIndicator = document.getElementById("difficulty-indicator");
     if (existingIndicator) {
         existingIndicator.remove();
@@ -175,12 +174,10 @@ function addDifficultyIndicator() {
 }
 
 function startTimer() {
-    // Clear any existing timer
     if (timer) {
         clearInterval(timer);
     }
     
-    // Start a new timer
     timer = setInterval(function() {
         timeLeft--;
         updateTimerDisplay();
@@ -199,13 +196,13 @@ function updateTimerDisplay() {
     
     // Change color based on time remaining
     if (timeLeft <= 5) {
-        timerElement.style.color = "#E9573F"; // Red for danger
+        timerElement.style.color = "#E9573F"; // Red
         timerElement.classList.add('critical');
     } else if (timeLeft <= 10) {
-        timerElement.style.color = "#8B8000"; // Yellow for warning
+        timerElement.style.color = "#8B8000"; // Yellow
         timerElement.classList.remove('critical');
     } else {
-        timerElement.style.color = "#8CC152"; // Green for good
+        timerElement.style.color = "#8CC152"; // Green
         timerElement.classList.remove('critical');
     }
 }
@@ -215,15 +212,13 @@ function handleTimeOut() {
     updateLivesDisplay();
     
     if (lives === 0) {
-        // Game over due to time out
         clearInterval(timer);
         document.getElementById("note").innerHTML = "Game Over!";
         document.getElementById('newGameButtonContainer').innerHTML = `
             <div class="game-over-message">Final Score: ${score}</div>
             <button class="button-62" onclick="saveAndStartNewGame()">New Game?</button>
         `;
-        
-        // Save the score
+
         saveScoreToFirestore()
             .then((isNewHighScore) => {
                 if (isNewHighScore) {
@@ -250,7 +245,6 @@ function saveAndStartNewGame() {
 }
 
 function resetTime() {
-    // Reset time based on difficulty
     switch(difficulty) {
         case "easy":
             timeLeft = 30;
@@ -268,7 +262,6 @@ function resetTime() {
 }
 
 function resetLivesAndTime() {
-    // Reset lives and time based on difficulty
     switch(difficulty) {
         case "easy":
             lives = 5;
@@ -291,20 +284,12 @@ function resetLivesAndTime() {
 }
 
 function newgame() {
-    // Get difficulty from localStorage again in case it changed
     difficulty = localStorage.getItem('gameDifficulty') || "medium";
-    
-    // Reset score
     score = 0;
     updateScoreDisplay();
-    
-    // Reset lives and time
     resetLivesAndTime();
-    
-    // Update the difficulty indicator
     addDifficultyIndicator();
     
-    // Reset timer
     if (timer) {
         clearInterval(timer);
     }
@@ -326,13 +311,9 @@ function handleIncorrectAnswer() {
             <div class="game-over-message">Final Score: ${score}</div>
             <button class="button-62" onclick="saveAndStartNewGame()">New Game?</button>
         `;
-        
-        // Save the score
         saveScoreToFirestore();
-        
         resetLivesAndTime();
     } else {
-        // Still have lives left
         document.getElementById("note").innerHTML = "Not Correct!";
         resetTime();
         clearInterval(timer);
@@ -340,13 +321,11 @@ function handleIncorrectAnswer() {
     }
 }
 
-// Handle user input
 function handleInput() {
     let inp = document.getElementById("input");
     let note = document.getElementById("note");
     
     if (parseInt(inp.value) === solution) {
-        // Stop the timer
         clearInterval(timer);
         
         // Calculate score based on difficulty and time left
@@ -367,22 +346,14 @@ function handleInput() {
                 timeBonus = timeLeft * 20;
                 break;
         }
-        
-        // Add to score
+
         score += basePoints + timeBonus;
         
         updateScoreDisplay();
-        
-        // Save the current score to localStorage for the shooter game to access
         localStorage.setItem('puzzleScore', score);
-        
-        // Display success message
         note.innerHTML = `Correct! +${basePoints + timeBonus} points`;
-        
-        // Show redirect message
         showRedirectMessage("Great job! Redirecting to bonus game...");
-        
-        // Redirect to the shooter game after a delay
+
         setTimeout(function() {
             window.location.href = 'extra_game.html';
         }, 2000);
@@ -394,19 +365,16 @@ function handleInput() {
 
 // Function to show a redirect message
 function showRedirectMessage(message) {
-    // Create message container if it doesn't exist
+
     let messageContainer = document.getElementById('redirect-message');
     if (!messageContainer) {
         messageContainer = document.createElement('div');
         messageContainer.id = 'redirect-message';
         document.body.appendChild(messageContainer);
     }
-    
-    // Set message content and show it
     messageContainer.innerHTML = message;
     messageContainer.style.display = 'flex';
-    
-    // Add animation class
+
     messageContainer.classList.add('message-animation');
 }
 
@@ -426,7 +394,7 @@ function updateLivesDisplay() {
 
 async function fetchText() {
     try {
-        let response = await fetch('https://marcconrad.com/uob/banana/api.php');
+        let response = await fetch('https://marcconrad.com/uob/banana/api.php'); //Used reference video given by UOB for understanding
         let data = await response.text();
         startQuest(data);
     } catch (error) {
@@ -503,7 +471,6 @@ function showLeaderboard() {
     leaderboardContainer.id = 'leaderboard-container';
     leaderboardContainer.className = 'leaderboard-container';
     
-    // Add a close button
     const closeButton = document.createElement('button');
     closeButton.innerHTML = 'X';
     closeButton.className = 'leaderboard-close-btn';
@@ -511,21 +478,14 @@ function showLeaderboard() {
         document.body.removeChild(leaderboardContainer);
     };
     
-    // Create leaderboard content
     const content = document.createElement('div');
     content.innerHTML = '<h2>Leaderboard</h2><div id="leaderboard-loading">Loading scores...</div>';
-    
-    // Add elements to container
+
     leaderboardContainer.appendChild(closeButton);
     leaderboardContainer.appendChild(content);
-    
-    // Add to body
+
     document.body.appendChild(leaderboardContainer);
     
-    // Fetch scores from Firestore
     fetchLeaderboardScores();
 }
-
-
-// Start the game with difficulty settings
 initializeGame();

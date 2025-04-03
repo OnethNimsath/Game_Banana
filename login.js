@@ -33,7 +33,6 @@ function showMessage(message, divClass) {
   }, 5000);
 }
 
-// Login form submission handler
 document.addEventListener('DOMContentLoaded', function() {
   const loginForm = document.getElementById('loginForm');
   
@@ -54,39 +53,32 @@ document.addEventListener('DOMContentLoaded', function() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       console.log("Successfully logged in:", user.uid);
-      
-      // Get user data from Firestore
+
       const docRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
         const userData = docSnap.data();
         console.log("Retrieved user data:", userData);
-        
-        // Extract username from email if displayName is not available
+
         const playerName = userData.displayName || email.split('@')[0];
-        
-        // Store in both sessionStorage and localStorage for different use cases
+
         sessionStorage.setItem('playerName', playerName);
         sessionStorage.setItem('playerEmail', userData.email);
         sessionStorage.setItem('playerId', user.uid);
-        
-        // Also store in localStorage for persistence across sessions
+
         localStorage.setItem('playerName', playerName);
         localStorage.setItem('userEmail', userData.email);
         localStorage.setItem('playerId', user.uid);
         
         showMessage(`Welcome back, ${playerName}! Redirecting to game menu...`, 'loginMessage');
-        
-        // Redirect to game menu after short delay
         console.log("Redirecting to menu.html in 2 seconds...");
         setTimeout(() => {
           window.location.href = 'menu.html';
         }, 2000);
       } else {
         console.log("No user data found in Firestore!");
-        
-        // Create a basic user record if none exists
+
         const basicUserData = {
           email: email,
           displayName: email.split('@')[0],
@@ -94,11 +86,9 @@ document.addEventListener('DOMContentLoaded', function() {
           highScore: 0,
           lastPlayed: new Date()
         };
-        
-        // Store the basic data
+
         await setDoc(doc(db, "users", user.uid), basicUserData);
         
-        // Store in both sessionStorage and localStorage
         const playerName = email.split('@')[0];
         sessionStorage.setItem('playerName', playerName);
         sessionStorage.setItem('playerEmail', email);

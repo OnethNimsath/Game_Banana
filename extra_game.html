@@ -430,28 +430,24 @@
                 appId: "1:225178137471:web:02a4135eb6347bd7c5204a"
             };
 
-            // Initialize Firebase
             if (!firebase.apps || !firebase.apps.length) {
                 firebase.initializeApp(firebaseConfig);
             }
             const db = firebase.firestore();
             const auth = firebase.auth();
-            
-            // Game initialization
+
             function initGame() {
-                // Get the score from the puzzle game if available
+                // Fetching the score from puzzle game
                 const puzzleScore = localStorage.getItem('puzzleScore');
                 let bonusTime = 0;
-                
-                // If there's a score from the puzzle game, give a time bonus
+
                 if (puzzleScore) {
                     score = parseInt(puzzleScore); // Start with the puzzle score
                     
                     // Add bonus time based on the puzzle score
-                    bonusTime = Math.floor(parseInt(puzzleScore) / 100); // 1 second for every 100 points
-                    timeLeft = 30 + bonusTime; // Add bonus time to the default time
-                    
-                    // Show welcome message with bonus info
+                    bonusTime = Math.floor(parseInt(puzzleScore) / 100);
+                    timeLeft = 30 + bonusTime; 
+
                     const welcomeMessage = document.createElement('div');
                     welcomeMessage.className = 'welcome-message';
                     welcomeMessage.innerHTML = `
@@ -461,57 +457,42 @@
                         <button id="start-game-btn">Start Game</button>
                     `;
                     document.body.appendChild(welcomeMessage);
-                    
-                    // Pause game until player clicks start
                     gameActive = false;
-                    
-                    // Add event listener to start button
                     document.getElementById('start-game-btn').addEventListener('click', function() {
                         welcomeMessage.remove();
                         gameActive = true;
                         startGame();
                     });
                 } else {
-                    // Normal initialization without bonus
                     score = 0;
                     timeLeft = 30;
                     startGame();
                 }
-                
-                // Update displays
                 updateScore();
                 updateTime();
-                
-                // Clear any existing bananas and bullets
                 document.querySelectorAll('.banana').forEach(b => b.remove());
                 document.querySelectorAll('.bullet').forEach(b => b.remove());
-                
-                // Hide game over screen
+
                 gameOverScreen.style.display = 'none';
             }
-            
-            // Function to start the game timers
+
             function startGame() {
-                // Start game timers
                 gameInterval = setInterval(updateGameTime, 1000);
                 bananaInterval = setInterval(createBanana, 1000);
             }
-            
-            // Create a new banana
+
             function createBanana() {
                 if (!gameActive) return;
                 
                 const banana = document.createElement('div');
                 banana.className = 'banana';
-                
-                // Random position along the top
+
                 const randomX = Math.random() * (gameContainer.clientWidth - 50);
                 banana.style.left = `${randomX}px`;
                 banana.style.top = '0px';
                 
                 gameContainer.appendChild(banana);
-                
-                // Animate banana falling
+
                 let posY = 0;
                 const speed = 2 + Math.random() * 3; // Random speed
                 
@@ -531,15 +512,13 @@
                     }
                 }, 20);
             }
-            
-            // Create a bullet when clicking
+
             function createBullet(e) {
                 if (!gameActive) return;
                 
                 const bullet = document.createElement('div');
                 bullet.className = 'bullet';
-                
-                // Start position (from gun barrel)
+
                 const gunBarrel = document.getElementById('gun-barrel');
                 const gunRect = gunBarrel.getBoundingClientRect();
                 const startX = gunRect.left + gunRect.width / 2 - 5;
@@ -549,8 +528,7 @@
                 bullet.style.top = `${startY}px`;
                 
                 gameContainer.appendChild(bullet);
-                
-                // Calculate bullet direction (towards click position)
+
                 const targetX = e.clientX;
                 const targetY = e.clientY;
                 
@@ -558,8 +536,7 @@
                 const speed = 10;
                 const velocityX = Math.cos(angle) * speed;
                 const velocityY = Math.sin(angle) * speed;
-                
-                // Animate bullet movement
+
                 let posX = startX;
                 let posY = startY;
                 
@@ -575,8 +552,7 @@
                     
                     bullet.style.left = `${posX}px`;
                     bullet.style.top = `${posY}px`;
-                    
-                    // Check collision with bananas
+
                     document.querySelectorAll('.banana').forEach(banana => {
                         const bananaRect = banana.getBoundingClientRect();
                         const bulletRect = bullet.getBoundingClientRect();
@@ -596,12 +572,12 @@
                             score += 10;
                             updateScore();
                             
-                            // Create explosion effect
+                            //Explosion effect
                             createExplosion(bananaRect.left + bananaRect.width / 2, bananaRect.top + bananaRect.height / 2);
                         }
                     });
                     
-                    // Remove bullet if it goes off screen
+                    // Make the bullet disappear
                     if (
                         posX < 0 ||
                         posX > gameContainer.clientWidth ||
@@ -613,8 +589,7 @@
                     }
                 }, 10);
             }
-            
-            // Create explosion effect
+
             function createExplosion(x, y) {
                 const explosion = document.createElement('div');
                 explosion.style.position = 'absolute';
@@ -627,8 +602,7 @@
                 explosion.style.zIndex = '4';
                 
                 gameContainer.appendChild(explosion);
-                
-                // Animate explosion
+
                 let size = 1;
                 let opacity = 0.7;
                 
@@ -669,10 +643,9 @@
                     endGame();
                 }
             }
-            
-            // Save shooter score to Firestore
+
             function saveShooterScoreToFirestore() {
-                // Get current user UID from Firebase Auth
+
                 const currentUser = auth.currentUser;
                 
                 if (!currentUser || !currentUser.uid) {
@@ -692,8 +665,6 @@
                         if (userDoc.exists) {
                             userData = userDoc.data();
                             console.log("Existing user data:", userData);
-                            
-                            // Only update if the new score is higher than the existing high score
                             if (!userData.shooterHighScore || shooterScore > userData.shooterHighScore) {
                                 transaction.update(userDocRef, {
                                     shooterHighScore: shooterScore,
@@ -703,16 +674,14 @@
                                 console.log("Updated high score to:", shooterScore);
                                 return true; // New high score
                             } else {
-                                // Still increment games played even if high score isn't beaten
                                 transaction.update(userDocRef, {
                                     gamesPlayed: (userData.gamesPlayed || 0) + 1
                                 });
                                 console.log("Score not higher than existing high score");
-                                return false; // Not a new high score
+                                return false; 
                             }
                         } else {
                             console.log("No existing user data found, creating new document");
-                            // This shouldn't typically happen, but handling just in case
                             transaction.set(userDocRef, {
                                 displayName: currentUser.displayName || "Player",
                                 email: currentUser.email,
@@ -728,8 +697,6 @@
                     return false;
                 });
             }
-
-            // Show login prompt if user is not logged in
             function showLoginPrompt() {
                 const loginPrompt = document.createElement('div');
                 loginPrompt.className = 'login-prompt';
@@ -744,22 +711,16 @@
                     </div>
                 `;
                 document.body.appendChild(loginPrompt);
-                
-                // Add event listener for login button
                 document.getElementById('login-button').addEventListener('click', () => {
                     const email = document.getElementById('login-email').value;
                     if (email && email.includes('@')) {
-                        // Sign in anonymously but store the email for later reference
                         auth.signInAnonymously()
                             .then((userCredential) => {
-                                // Store email in localStorage for reference
                                 localStorage.setItem('userEmail', email);
-                                
-                                // Update the user profile with a display name derived from email
                                 const user = userCredential.user;
                                 const displayName = email.split('@')[0];
                                 
-                                // Create user document in Firestore
+                                // Create user in firestore
                                 db.collection('users').doc(user.uid).set({
                                     displayName: displayName,
                                     email: email,
@@ -838,54 +799,45 @@
                 }
             }
 
-            // Function to show shooter game leaderboard
             function showShooterLeaderboard() {
-                // Create a leaderboard container if it doesn't exist
+
                 let leaderboardContainer = document.getElementById('shooter-leaderboard-container');
                 
                 if (!leaderboardContainer) {
                     leaderboardContainer = document.createElement('div');
                     leaderboardContainer.id = 'shooter-leaderboard-container';
                     leaderboardContainer.className = 'leaderboard-container';
-                    
-                    // Add a close button
+
                     const closeButton = document.createElement('button');
                     closeButton.innerHTML = 'X';
                     closeButton.className = 'leaderboard-close-btn';
                     closeButton.onclick = () => {
                         leaderboardContainer.style.display = 'none';
                     };
-                    
-                    // Create leaderboard content
+
                     const content = document.createElement('div');
                     content.innerHTML = '<h2>Shooter Leaderboard</h2><div id="shooter-leaderboard-content">Loading scores...</div>';
                     
-                    // Add elements to container
                     leaderboardContainer.appendChild(closeButton);
                     leaderboardContainer.appendChild(content);
-                    
-                    // Add to body
+
                     document.body.appendChild(leaderboardContainer);
                 } else {
                     leaderboardContainer.style.display = 'block';
                 }
-                
-                // Fetch scores from Firestore
+
                 fetchShooterLeaderboardScores();
             }
 
-            // End the game
             function endGame() {
                 gameActive = false;
                 clearInterval(gameInterval);
                 clearInterval(bananaInterval);
                 
-                // Check if user is already authenticated
+                //Check if it is an authorized user
                 if (auth.currentUser) {
-                    // Save score to Firestore
                     saveShooterScoreToFirestore()
                         .then((isNewHighScore) => {
-                            // Show appropriate message in game over screen
                             if (isNewHighScore) {
                                 let newHighScoreMessage = document.querySelector('.high-score-message');
                                 if (!newHighScoreMessage) {
@@ -895,26 +847,20 @@
                                     gameOverScreen.insertBefore(newHighScoreMessage, finalScoreDisplay);
                                 }
                             }
-                            
-                            // Show game over screen
                             gameOverScreen.style.display = 'block';
-                            
-                            // Add a leaderboard button to the game over screen if it doesn't exist
+
                             if (!document.querySelector('.leaderboard-btn')) {
                                 const leaderboardButton = document.createElement('button');
                                 leaderboardButton.textContent = 'View Leaderboard';
                                 leaderboardButton.className = 'leaderboard-btn';
                                 leaderboardButton.onclick = showShooterLeaderboard;
-                                
-                                // Add it after the play again button
+
                                 if (playAgainButton.nextSibling) {
                                     gameOverScreen.insertBefore(leaderboardButton, playAgainButton.nextSibling);
                                 } else {
                                     gameOverScreen.appendChild(leaderboardButton);
                                 }
                             }
-
-                            // Add Back to Main Menu button if it doesn't exist
                             if (!document.querySelector('.main-menu-btn')) {
                                 const mainMenuButton = document.createElement('button');
                                 mainMenuButton.textContent = 'Back to Main Menu';
@@ -922,13 +868,10 @@
                                 mainMenuButton.onclick = function() {
                                     window.location.href = 'menu.html';
                                 };
-                                
-                                // Add it after the leaderboard button or play again button
                                 gameOverScreen.appendChild(mainMenuButton);
                             }
                         });
                 } else {
-                    // Try to get the user from localStorage for backward compatibility
                     const storedEmail = localStorage.getItem('userEmail');
                     
                     if (storedEmail) {
@@ -948,11 +891,10 @@
                                 }, { merge: true });
                             })
                             .then(() => {
-                                // Now that we've created the user, save the score
                                 return saveShooterScoreToFirestore();
                             })
                             .then((isNewHighScore) => {
-                                // Show high score message if appropriate
+                                // Show high score message
                                 if (isNewHighScore) {
                                     let newHighScoreMessage = document.querySelector('.high-score-message');
                                     if (!newHighScoreMessage) {
@@ -962,11 +904,9 @@
                                         gameOverScreen.insertBefore(newHighScoreMessage, finalScoreDisplay);
                                     }
                                 }
-                                
-                                // Show game over screen with buttons
+
                                 gameOverScreen.style.display = 'block';
-                                
-                                // Add leaderboard button
+
                                 if (!document.querySelector('.leaderboard-btn')) {
                                     const leaderboardButton = document.createElement('button');
                                     leaderboardButton.textContent = 'View Leaderboard';
@@ -993,21 +933,16 @@
                                 showLoginPrompt();
                             });
                     } else {
-                        // No stored email, show login prompt
                         showLoginPrompt();
                     }
                 }
             }
-            
-            // Event Listeners
+
             gameContainer.addEventListener('click', createBullet);
             playAgainButton.addEventListener('click', initGame);
             backButton.addEventListener('click', () => {
-                // Navigate back to the main game page
                 window.location.href = 'game.html';
             });
-            
-            // Start the game
             initGame();
         });
     </script>

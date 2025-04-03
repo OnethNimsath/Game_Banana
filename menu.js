@@ -1,3 +1,8 @@
+//https://www.w3schools.com/jS/js_cookies.asp#:~:text=Create%20a%20Cookie%20with%20JavaScript,date%20(in%20UTC%20time). used for reference
+//https://stackoverflow.com/questions/14573223/set-cookie-and-get-cookie-with-javascript used for reference
+//https://www.youtube.com/watch?v=AuLMvRcWmss used for reference
+//https://www.youtube.com/watch?v=GihQAC1I39Q used for reference
+
 // Cookie management functions
 function setCookie(name, value, days) {
     const expiryDate = new Date();
@@ -27,56 +32,41 @@ function getCookie(name) {
     
     return null;
 }
-
-// Player Inactivity Timeout Handler
 let inactivityTimer;
-const TIMEOUT_DURATION = 20000; // 20 seconds in milliseconds
+const TIMEOUT_DURATION = 20000; //Player inactivity for 20 seconds
+
+//https://medium.com/@patelharsh7458/understanding-sessions-in-javascript-ce5f83928810 used for reference
+//https://medium.com/@diwakarkashyap/session-in-javascript-69ef8c39660b used for reference
+//Used LLM for code enhancing 
 
 // Function to reset the timer
 function resetInactivityTimer() {
-    // Clear the existing timer if there is one
     if (inactivityTimer) {
         clearTimeout(inactivityTimer);
     }
-    
-    // Set a new timer
     inactivityTimer = setTimeout(logoutDueToInactivity, TIMEOUT_DURATION);
 }
 
 // Function to handle logout
 function logoutDueToInactivity() {
     console.log("User inactive for 20 seconds, logging out...");
-    
-    // You can add an alert to notify the user if desired
     alert("You have been logged out due to inactivity.");
-    
-    // Redirect to login page
     window.location.href = "login.html";
 }
 
 // Set up event listeners for user activity
 function setupInactivityDetection() {
-    // Initialize the timer when the page loads
     resetInactivityTimer();
-    
-    // Reset timer on mouse movement
+
+    //Used event listener to detect user activity
     document.addEventListener("mousemove", resetInactivityTimer);
-    
-    // Reset timer on mouse clicks
     document.addEventListener("mousedown", resetInactivityTimer);
-    
-    // Reset timer on key presses
     document.addEventListener("keydown", resetInactivityTimer);
-    
-    // Reset timer on touch events (for mobile devices)
     document.addEventListener("touchstart", resetInactivityTimer);
     document.addEventListener("touchmove", resetInactivityTimer);
-    
-    // Reset timer on scroll events
     document.addEventListener("scroll", resetInactivityTimer);
 }
 
-// If you need to disable the timeout temporarily (e.g., during game play)
 function pauseInactivityDetection() {
     if (inactivityTimer) {
         clearTimeout(inactivityTimer);
@@ -84,12 +74,11 @@ function pauseInactivityDetection() {
     }
 }
 
-// To resume inactivity detection after pausing
 function resumeInactivityDetection() {
     resetInactivityTimer();
 }
   
-// Page navigation
+//Navigation links
 document.getElementById("exitGame").addEventListener("click", function() {
     window.location.href = "login.html";
 });
@@ -106,7 +95,7 @@ document.getElementById("playGame").addEventListener("click", function() {
     window.location.href = "game_difficulty.html";
 });
   
-// Create floating monkey animations
+//Floating animations for monkeys
 function createMonkeys() {
     for (let i = 0; i < 10; i++) {
         const monkey = document.createElement('div');
@@ -116,12 +105,10 @@ function createMonkeys() {
         monkey.style.animationDelay = Math.random() * 5 + 's';
         document.body.appendChild(monkey);
     }
-    
-    // Initialize audio after creating elements
     initializeAudio();
 }
   
-// Initialize audio functionality
+//Game audio initialization
 function initializeAudio() {
     const audioControl = document.getElementById('audioControl');
     const audioIcon = document.getElementById('audioIcon');
@@ -130,37 +117,33 @@ function initializeAudio() {
     const muteSlash = document.getElementById('muteSlash');
     const backgroundMusic = document.getElementById('backgroundMusic');
     
-    // Set initial state to muted by default
     backgroundMusic.muted = true;
-    backgroundMusic.load(); // Make sure the audio is loaded and ready
+    backgroundMusic.load(); 
     
-    // Check if we have a saved audio preference in cookies
+    //https://www.youtube.com/watch?v=WCVUyVQopAE used for reference 
+    //https://stackoverflow.com/questions/50041235/create-cookie-for-audio-play-mute-setting used for reference
+
+    //Saving audio preferences in cookies
     const audioMuted = getCookie('bananaquestAudioMuted');
     
-    // If there's a saved preference and it's 'false', we should unmute
     if (audioMuted === 'false') {
-        // Visual update for unmuted state
         soundWave1.style.display = 'block';
         soundWave2.style.display = 'block';
         muteSlash.style.display = 'none';
         backgroundMusic.muted = false;
         
-        // Try to play audio (might need user interaction first)
         const playPromise = backgroundMusic.play();
         
         if (playPromise !== undefined) {
             playPromise.catch(error => {
-                // Browser prevented autoplay, will need user interaction
                 console.log("Audio autoplay prevented by browser, needs user interaction");
                 
-                // Set up a one-time click listener for the whole document
+                //Event listener added to click audio button
                 document.addEventListener('click', function initialPlayHandler() {
                     if (!backgroundMusic.muted) {
                         backgroundMusic.play().then(() => {
-                            // Successfully started playing
                             document.removeEventListener('click', initialPlayHandler);
                         }).catch(e => {
-                            // Still couldn't play for some reason
                             console.error("Still couldn't play audio after user interaction:", e);
                         });
                     }
@@ -172,7 +155,6 @@ function initializeAudio() {
     // Toggle audio function
     function toggleAudio() {
         if (backgroundMusic.muted) {
-            // Unmute
             backgroundMusic.muted = false;
             backgroundMusic.play().catch(error => {
                 console.log("Audio play prevented until user interacts with page");
@@ -180,27 +162,21 @@ function initializeAudio() {
             soundWave1.style.display = 'block';
             soundWave2.style.display = 'block';
             muteSlash.style.display = 'none';
-            
-            // Save preference to cookie (unmuted = false)
-            setCookie('bananaquestAudioMuted', 'false', 30); // Expires in 30 days
+            setCookie('bananaquestAudioMuted', 'false', 30); // Cookie expires in 30 days
         } else {
-            // Mute
             backgroundMusic.muted = true;
             soundWave1.style.display = 'none';
             soundWave2.style.display = 'none';
             muteSlash.style.display = 'block';
-            
-            // Save preference to cookie (muted = true)
-            setCookie('bananaquestAudioMuted', 'true', 30); // Expires in 30 days
+            setCookie('bananaquestAudioMuted', 'true', 30); // Cookie expires in 30 days
         }
     }
-    
-    // Add click event to toggle audio
+    //Used event listener to the audio button
     audioControl.addEventListener('click', toggleAudio);
 }
 
-// Call functions when the page loads
+//Loading of the page
 window.onload = function() {
     createMonkeys();
-    setupInactivityDetection(); // Initialize the inactivity detection
+    setupInactivityDetection(); 
 };

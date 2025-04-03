@@ -1,4 +1,6 @@
 // Import Firebase modules
+// https://firebase.google.com/docs/auth/web/start used for reference
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getFirestore, collection, query, orderBy, limit, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
@@ -16,14 +18,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore();
 
-// DOM Elements
 document.addEventListener('DOMContentLoaded', () => {
-  // Load shooter leaderboard
   loadShooterLeaderboard();
-  // Load player stats
   loadPlayerStats();
 });
 
+//Used LLM for referencing of codes
 // Load Shooter Game Leaderboard
 async function loadShooterLeaderboard() {
     
@@ -134,11 +134,7 @@ async function loadPlayerStats() {
       playerStatsContainer.innerHTML = '<p>No statistics found for your account.</p>';
       return;
     }
-    
-    // Get shooter ranking
     const shooterRanking = await getPlayerRanking(playerDoc, "shooterHighScore");
-    
-    // Format stats
     const shooterHighScore = userData.shooterHighScore || 0;
     const playerName = userData.displayName || playerEmail.split('@')[0];
     
@@ -179,7 +175,6 @@ async function getPlayerRanking(playerId, scoreField) {
     
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      // Skip entries with no score in this category
       if (!data[scoreField]) return;
       
       if (doc.id === playerId) {

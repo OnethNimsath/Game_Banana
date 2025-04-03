@@ -1,4 +1,5 @@
-// Import Firebase modules
+// https://firebase.google.com/docs/auth/web/start used for reference
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { 
   getAuth, 
@@ -27,7 +28,6 @@ const firebaseConfig = {
   messagingSenderId: "225178137471",
   appId: "1:225178137471:web:02a4135eb6347bd7c5204a"
 };
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
@@ -52,23 +52,23 @@ function logAllFields(obj, prefix = '') {
   }
 }
 
-// Check if user is logged in
+//Checking the user login
 onAuthStateChanged(auth, user => {
   if (user) {
-    // User is signed in, fetch their data from Firestore
     loadUserData(user);
   } else {
-    // No user is signed in, redirect to login page
     window.location.href = 'login.html';
   }
 });
 
+//https://firebase.google.com/docs/firestore/query-data/get-data used for reference
+//https://stackoverflow.com/questions/56249121/how-to-retrieve-and-display-data-from-users-that-are-logged-in-firestore used for reference
+//https://www.youtube.com/watch?v=qWy9ylc3f9U used for reference
+
 // Load user data from Firestore
 async function loadUserData(user) {
-  // Set email from auth
   emailInput.value = user.email;
   
-  // Set loading messages
   highScoreElement.textContent = "Loading...";
   bananasCollectedElement.textContent = "Loading...";
   gamesPlayedElement.textContent = "Loading...";
@@ -76,43 +76,34 @@ async function loadUserData(user) {
   console.log("Loading user data for:", user.email);
   
   try {
-    // Fetch additional user data from 'users' collection using UID
+    //Fetching additional data from the collection
     const userDocRef = doc(db, "users", user.uid);
     const userSnapshot = await getDoc(userDocRef);
     
     if (userSnapshot.exists()) {
       const userData = userSnapshot.data();
       console.log("Found user document:", userData);
-      
-      // Log all fields to debug
       logAllFields(userData, "User data");
-      
-      // Set player name if it exists in Firestore
       playerNameInput.value = userData.displayName || '';
-      
-      // If name is still empty, try to get it from localStorage or sessionStorage
       if (!playerNameInput.value) {
         playerNameInput.value = localStorage.getItem('playerName') || 
                               sessionStorage.getItem('playerName') || 
                               user.email.split('@')[0] || '';
       }
-      
-      // Set bananas collected if it exists
       if (userData.bananasCollected !== undefined) {
         bananasCollectedElement.textContent = parseInt(userData.bananasCollected).toLocaleString();
       } else {
         bananasCollectedElement.textContent = '0';
       }
       
-      // Set games played if it exists
+      //Check number of games played
       if (userData.gamesPlayed !== undefined) {
         gamesPlayedElement.textContent = parseInt(userData.gamesPlayed).toLocaleString();
       } else {
         gamesPlayedElement.textContent = '0';
       }
       
-      // IMPORTANT: Check for both shooterHighScore and highScore fields
-      // Based on console output, it appears your document uses highScore, not shooterHighScore
+      //Displaying of high score
       let shooterScore = 0;
       if (userData.shooterHighScore !== undefined) {
         shooterScore = parseInt(userData.shooterHighScore);
@@ -124,8 +115,7 @@ async function loadUserData(user) {
       
       console.log("Found shooter high score in user document:", shooterScore);
       highScoreElement.textContent = shooterScore.toLocaleString();
-      
-      // Save the name back to Firestore if we got it from another source but it's not in Firestore
+    
       if (playerNameInput.value && !userData.displayName) {
         try {
           await updateDoc(userDocRef, {
@@ -142,11 +132,11 @@ async function loadUserData(user) {
                        sessionStorage.getItem('playerName') || 
                        user.email.split('@')[0] || '';
       
-      // No Firestore document exists yet, create one with default values
+      //Create firestore document if no document exist
       await setDoc(userDocRef, {
         displayName: storedName,
         email: user.email,
-        highScore: 0,  // Using highScore based on your document structure
+        highScore: 0, 
         score: 0,
         lastPlayed: serverTimestamp(),
         bananasCollected: 0,
@@ -158,21 +148,16 @@ async function loadUserData(user) {
       bananasCollectedElement.textContent = '0';
       gamesPlayedElement.textContent = '0';
     }
-    
-    // Also search by email in users collection to find all documents related to this user
     await searchUsersByEmail(user.email, user.uid);
-    
-    // Store email in localStorage for other pages
     localStorage.setItem('userEmail', user.email);
     
-    // Show account content
     loadingMessage.style.display = 'none';
     accountContent.style.display = 'block';
   } catch (error) {
     console.error("Error getting user document:", error);
     loadingMessage.textContent = 'Error loading user data. Please try again.';
     
-    // Still show account content with default values
+    //Show default values if there is an error loading user data
     highScoreElement.textContent = '0';
     bananasCollectedElement.textContent = '0';
     gamesPlayedElement.textContent = '0';
@@ -204,18 +189,13 @@ async function searchUsersByEmail(email, currentUserId) {
   }
 }
 
-// Process all user documents found
 async function processUserDocuments(docs, currentUserId) {
   let highestShooterScore = parseInt(highScoreElement.textContent.replace(/,/g, '')) || 0;
   
   docs.forEach(document => {
     const userData = document.data();
     console.log("Processing user document:", document.id, userData);
-    
-    // Log all fields for debugging
     logAllFields(userData, "Processing document");
-    
-    // Check multiple field names that might contain the score
     let docHighScore = 0;
     
     if (userData.shooterHighScore !== undefined) {
@@ -231,6 +211,9 @@ async function processUserDocuments(docs, currentUserId) {
       console.log("Found higher shooter score:", highestShooterScore);
     }
   });
+  
+  //https://stackoverflow.com/questions/64113076/javascript-high-score-update-regardless-of-whether-new-score-is-higher-or-not
+  //Used LLM for code enhancements
   
   // Update the high score display if we found a higher score
   if (highestShooterScore > 0) {
@@ -250,6 +233,7 @@ async function processUserDocuments(docs, currentUserId) {
         if (userData.shooterHighScore !== undefined) {
           currentHighScore = parseInt(userData.shooterHighScore) || 0;
           
+          //Checking the new score with the previous score
           if (highestShooterScore > currentHighScore) {
             await updateDoc(currentUserDocRef, {
               shooterHighScore: highestShooterScore
@@ -264,12 +248,10 @@ async function processUserDocuments(docs, currentUserId) {
             });
           }
         } else {
-          // If neither field exists, use highScore based on your structure
           await updateDoc(currentUserDocRef, {
             highScore: highestShooterScore
           });
         }
-        
         console.log("Updated user document with highest shooter score:", highestShooterScore);
       }
     } catch (error) {
@@ -278,17 +260,15 @@ async function processUserDocuments(docs, currentUserId) {
   }
 }
 
-// Save player name button functionality
+//Saving the player name
 saveNameBtn.addEventListener('click', async function() {
   const newName = playerNameInput.value.trim();
   
   if (!newName) {
-    // Show error if name is empty
     errorMessage.textContent = 'Please enter a valid name';
     errorMessage.style.display = 'block';
     return;
   }
-  
   errorMessage.style.display = 'none';
   saveNameBtn.disabled = true;
   saveNameBtn.textContent = 'Saving...';
@@ -296,18 +276,15 @@ saveNameBtn.addEventListener('click', async function() {
   const user = auth.currentUser;
   if (user) {
     try {
-      // Update name in Firestore
+      //Update name when changed
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, {
         displayName: newName
       });
-      
-      // Update displayName in Auth if needed
       await updateProfile(user, {
         displayName: newName
       });
-      
-      // Save to localStorage and sessionStorage for cross-page consistency
+      //Save in local storage for cross page consistency
       localStorage.setItem('playerName', newName);
       sessionStorage.setItem('playerName', newName);
       
@@ -326,7 +303,7 @@ saveNameBtn.addEventListener('click', async function() {
   }
 });
 
-// Function to update shooter high score (call this when player finishes a shooter game)
+// Function to update shooter high score
 export async function updateShooterHighScore(newScore) {
   const user = auth.currentUser;
   if (user) {
@@ -336,9 +313,7 @@ export async function updateShooterHighScore(newScore) {
       
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        
-        // Determine which field is used for high score
-        let fieldName = 'highScore'; // Default based on your structure
+        let fieldName = 'highScore';
         let currentHighScore = 0;
         
         if (userData.shooterHighScore !== undefined) {
@@ -362,13 +337,11 @@ export async function updateShooterHighScore(newScore) {
           
           await updateDoc(userDocRef, updateData);
           console.log(`Updated ${fieldName} to:`, newScore);
-          
-          // Update the display if we're on the profile page
+
           if (highScoreElement) {
             highScoreElement.textContent = newScore.toLocaleString();
           }
         } else {
-          // Always update the current score and timestamp
           await updateDoc(userDocRef, {
             score: newScore,
             lastPlayed: serverTimestamp()
@@ -376,7 +349,6 @@ export async function updateShooterHighScore(newScore) {
           console.log("Updated current score to:", newScore);
         }
       } else {
-        // If document doesn't exist, create it with the shooter score
         const playerName = localStorage.getItem('playerName') || 
                          sessionStorage.getItem('playerName') || 
                          user.displayName || 
@@ -385,7 +357,7 @@ export async function updateShooterHighScore(newScore) {
         await setDoc(userDocRef, {
           displayName: playerName,
           email: user.email,
-          highScore: newScore,  // Using highScore based on your structure
+          highScore: newScore, 
           score: newScore,
           lastPlayed: serverTimestamp(),
           bananasCollected: 0,
@@ -414,23 +386,20 @@ export async function updateGameStats(bananasCollected) {
         const currentBananas = userData.bananasCollected || 0;
         const currentGames = userData.gamesPlayed || 0;
         
-        // Update user document with incremented stats
+        //Updating the number of times the game is played
         await updateDoc(userDocRef, {
           bananasCollected: currentBananas + bananasCollected,
           gamesPlayed: currentGames + 1
         });
       } else {
-        // Try to get name from various sources
         const playerName = localStorage.getItem('playerName') || 
                          sessionStorage.getItem('playerName') || 
                          user.displayName || 
                          user.email.split('@')[0] || '';
-        
-        // If the document doesn't exist, create it
         await setDoc(userDocRef, {
           displayName: playerName,
           email: user.email,
-          highScore: 0,  // Using highScore based on your structure
+          highScore: 0,
           score: 0,
           lastPlayed: serverTimestamp(),
           bananasCollected: bananasCollected,
@@ -439,8 +408,7 @@ export async function updateGameStats(bananasCollected) {
       }
       
       console.log("Game stats updated");
-      
-      // Refresh the displayed stats if we're on the profile page
+
       if (bananasCollectedElement && gamesPlayedElement) {
         const currentBananas = parseInt(bananasCollectedElement.textContent.replace(/,/g, '')) || 0;
         const currentGames = parseInt(gamesPlayedElement.textContent.replace(/,/g, '')) || 0;
