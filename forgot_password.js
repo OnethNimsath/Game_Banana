@@ -51,16 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
     resetButton.textContent = "Sending...";
     
     try {
-      // Send password reset email
       await sendPasswordResetEmail(auth, email);
-      
-      // Show success message
       showMessage(`Password reset link sent to ${email}. Please check your inbox and spam folders.`, 'resetMessage');
-      
-      // Clear the email field
       document.getElementById('email').value = '';
-      
-      // Re-enable button after 3 seconds
       setTimeout(() => {
         resetButton.disabled = false;
         resetButton.textContent = "Send Reset Password Link";
@@ -68,8 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
     } catch (error) {
       console.error("Password reset error:", error);
-      
-      // Handle different error scenarios
+
       let errorMessage = "Failed to send reset email. Please try again.";
       
       if (error.code === 'auth/user-not-found') {
@@ -81,8 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       showMessage(errorMessage, 'resetMessage');
-      
-      // Re-enable button
       resetButton.disabled = false;
       resetButton.textContent = "Send Reset Password Link";
     }

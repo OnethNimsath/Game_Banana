@@ -404,14 +404,12 @@
     <script>
         // Wait for DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // Game variables
             let score = 0;
             let timeLeft = 30;
             let gameInterval;
             let bananaInterval;
             let gameActive = true;
             
-            // DOM elements
             const gameContainer = document.getElementById('game-container');
             const timeDisplay = document.getElementById('time-display');
             const scoreDisplay = document.getElementById('score-display');
@@ -505,7 +503,6 @@
                     posY += speed;
                     banana.style.top = `${posY}px`;
                     
-                    // Remove banana if it goes off screen
                     if (posY > gameContainer.clientHeight) {
                         clearInterval(bananaFall);
                         banana.remove();
@@ -563,21 +560,17 @@
                             bulletRect.top < bananaRect.bottom &&
                             bulletRect.bottom > bananaRect.top
                         ) {
-                            // Collision detected
                             banana.remove();
                             bullet.remove();
                             clearInterval(bulletMove);
-                            
-                            // Increase score
+ 
                             score += 10;
                             updateScore();
                             
-                            //Explosion effect
                             createExplosion(bananaRect.left + bananaRect.width / 2, bananaRect.top + bananaRect.height / 2);
                         }
                     });
                     
-                    // Make the bullet disappear
                     if (
                         posX < 0 ||
                         posX > gameContainer.clientWidth ||
